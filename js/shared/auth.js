@@ -58,7 +58,7 @@ function getUserRole() {
 function checkAuth() {
     const userData = localStorage.getItem('user');
     if (!userData) {
-        window.location.href = '../pages/login.html';
+        window.location.href = '../../pages/login.html';
         return false;
     }
     return true;
@@ -70,7 +70,7 @@ export function isAuthenticated() {
 
 export function logout() {
     localStorage.clear();
-    window.location.href = '../pages/login.html';
+    window.location.href = '../../pages/login.html';
 }
 
 export { getUserRole, checkAuth };

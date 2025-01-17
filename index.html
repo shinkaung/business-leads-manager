@@ -52,7 +52,7 @@
         // Check authentication and role
         const userData = localStorage.getItem('user');
         if (!userData) {
-            window.location.replace('./pages/login.html');
+            window.location.replace('pages/login.html');
             throw new Error('No user data found');
         }
         
@@ -60,9 +60,9 @@
         if (user.role !== 'admin') {
             // Redirect non-admin users to appropriate pages
             if (user.role === 'salesman') {
-                window.location.replace('./pages/salesman.html');
+                window.location.replace('pages/salesman.html');
             } else {
-                window.location.replace('./pages/login.html');
+                window.location.replace('pages/login.html');
             }
             throw new Error('Invalid role');
         }

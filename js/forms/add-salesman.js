@@ -47,7 +47,7 @@ function setupFormSubmission() {
         try {
             await createAirtableRecord(record);
             alert('Lead added successfully!');
-            window.location.href = './salesman.html';
+            window.location.href = 'salesman.html';
         } catch (error) {
             alert('Error adding lead: ' + error.message);
         }

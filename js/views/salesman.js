@@ -5,7 +5,7 @@ const tableBody = document.querySelector('.table tbody');
 
 function editLead(id) {
     const returnTo = 'salesman';
-    window.location.href = `edit.html?id=${id}&returnTo=${returnTo}`;
+    window.location.href = `../pages/edit.html?id=${id}&returnTo=${returnTo}`;
 }
 
 async function loadLeads() {

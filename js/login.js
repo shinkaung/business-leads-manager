@@ -32,9 +32,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             // Handle redirects based on role
             const role = authResult.role.toLowerCase();
             if (role === 'admin') {
-                window.location.replace('/index.html');
+                window.location.replace('../index.html');
             } else if (role === 'salesperson') {
-                window.location.replace('/pages/salesman.html');
+                window.location.replace('./salesman.html');
             } else {
                 alert('Invalid user role: ' + authResult.role);
                 localStorage.clear();
