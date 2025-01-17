@@ -3,24 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Record - Master List</title>
+    <title>Edit Lead - Sales Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
     <div class="container-fluid mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Edit Record</h2>
-            <a href="../index.html" class="btn btn-secondary">Back to List</a>
+            <h2>Edit Lead</h2>
+            <button onclick="goBack()" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </button>
         </div>
         
         <form id="editRecordForm" class="mt-4">
-            <!-- Same form fields as add.html -->
-            <!-- Copy all the form fields from add.html here -->
+            <div class="row g-3">
+                <!-- Contact Information -->
+                <div class="col-md-6">
+                    <label for="Contact Person" class="form-label">Contact Person</label>
+                    <input type="text" class="form-control" name="Contact Person" id="Contact Person">
+                </div>
+                <div class="col-md-6">
+                    <label for="Position" class="form-label">Position</label>
+                    <input type="text" class="form-control" name="Position" id="Position">
+                </div>
+                <div class="col-md-6">
+                    <label for="Tel" class="form-label">Telephone</label>
+                    <input type="tel" class="form-control" name="Tel" id="Tel">
+                </div>
+                <div class="col-md-6">
+                    <label for="Email" class="form-label">Email</label>
+                    <input type="email" class="form-control" name="Email" id="Email">
+                </div>
+
+                <!-- Outlet Information -->
+                <div class="col-md-6">
+                    <label for="Name of outlet" class="form-label">Name of Outlet</label>
+                    <input type="text" class="form-control" name="Name of outlet" id="Name of outlet" list="outletList">
+                    <datalist id="outletList"></datalist>
+                </div>
+                <div class="col-md-6">
+                    <label for="Address" class="form-label">Address</label>
+                    <input type="text" class="form-control" name="Address" id="Address">
+                </div>
+                <div class="col-md-6">
+                    <label for="Postal Code" class="form-label">Postal Code</label>
+                    <input type="text" class="form-control" name="Postal Code" id="Postal Code">
+                </div>
+
+                <!-- Products Information -->
+                <div class="col-md-6">
+                    <label for="Products on Tap" class="form-label">Products on Tap</label>
+                    <input type="text" class="form-control" name="Products on Tap" id="Products on Tap" list="productsOnTapList">
+                    <datalist id="productsOnTapList"></datalist>
+                </div>
+                <div class="col-md-6">
+                    <label for="Beer Bottle Products" class="form-label">Beer Bottle Products</label>
+                    <input type="text" class="form-control" name="Beer Bottle Products" id="Beer Bottle Products" list="beerBottleProductsList">
+                    <datalist id="beerBottleProductsList"></datalist>
+                </div>
+                <div class="col-md-6">
+                    <label for="Soju Products" class="form-label">Soju Products</label>
+                    <input type="text" class="form-control" name="Soju Products" id="Soju Products" list="sojuProductsList">
+                    <datalist id="sojuProductsList"></datalist>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="col-12">
+                    <label for="Follow Up Actions" class="form-label">Follow Up Actions</label>
+                    <textarea class="form-control" name="Follow Up Actions" id="Follow Up Actions" rows="3"></textarea>
+                </div>
+                <div class="col-12">
+                    <label for="Remarks" class="form-label">Remarks</label>
+                    <textarea class="form-control" name="Remarks" id="Remarks" rows="3"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
         </form>
     </div>
 
-    <script type="module" src="../js/airtable.js"></script>
-    <script type="module" src="../js/edit.js"></script>
+    <script>
+        function goBack() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnTo = urlParams.get('returnTo') || 'index';
+            window.location.href = returnTo === 'salesman' ? './salesman.html' : '../index.html';
+        }
+    </script>
+    <script type="module" src="../js/shared/airtable.js"></script>
+    <script type="module" src="../js/shared/autocomplete.js"></script>
+    <script type="module" src="../js/forms/edit.js"></script>
 </body>
 </html> 

@@ -396,3 +396,214 @@ body {
     font-size: 1.1em;
     opacity: 0.9;
 }
+
+/* Responsive table styles */
+.table-responsive-wrapper {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+}
+
+.mobile-table {
+    width: 100%;
+    min-width: 800px; /* Ensure minimum width for all columns */
+    border-collapse: collapse;
+}
+
+.mobile-table th,
+.mobile-table td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    overflow: hidden;
+}
+
+/* Priority columns that should always be visible */
+.priority-high {
+    position: sticky;
+    left: 0;
+    background-color: #fff;
+    z-index: 1;
+}
+
+/* Responsive cards for mobile view */
+@media screen and (max-width: 768px) {
+    .mobile-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .mobile-card-field {
+        display: flex;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mobile-card-label {
+        font-weight: bold;
+        width: 40%;
+        color: #666;
+    }
+
+    .mobile-card-value {
+        width: 60%;
+        word-break: break-word;
+    }
+
+    .mobile-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+}
+
+/* Utility classes */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-mobile {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+/* Mobile-friendly styles */
+@media screen and (max-width: 768px) {
+    /* Hide table on mobile */
+    .table-responsive {
+        display: none;
+    }
+
+    /* Show cards on mobile */
+    .mobile-cards {
+        display: block;
+    }
+
+    /* Mobile card styling */
+    .mobile-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .mobile-card-header {
+        border-bottom: 1px solid #eee;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .mobile-card-field {
+        display: flex;
+        margin: 0.5rem 0;
+    }
+
+    .mobile-card-label {
+        font-weight: bold;
+        width: 40%;
+        color: #666;
+    }
+
+    .mobile-card-value {
+        width: 60%;
+    }
+
+    .mobile-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+
+    /* Adjust existing elements for mobile */
+    .action-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Desktop-only styles */
+@media screen and (min-width: 769px) {
+    .mobile-cards {
+        display: none;
+    }
+}
+
+/* Mobile Lead Cards Styling */
+.lead-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.lead-card-header {
+    margin-bottom: 1rem;
+}
+
+.lead-card-basic-info p {
+    margin-bottom: 0.5rem;
+}
+
+.lead-card-details {
+    margin: 1rem 0;
+}
+
+.details-grid {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.lead-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .desktop-view {
+        display: none;
+    }
+    
+    .mobile-view {
+        display: block;
+    }
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.lead-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}

@@ -23,29 +23,48 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Apollo to Airtable Export</h2>
-        <button id="exportBtn" class="btn btn-primary">Run Export</button>
+        <h2>Apollo Data Import</h2>
+        
+        <div class="mb-3">
+            <label for="csvFile" class="form-label">Upload Apollo CSV Export</label>
+            <input type="file" class="form-control" id="csvFile" accept=".csv">
+        </div>
+        
+        <button id="importBtn" class="btn btn-primary">Import CSV</button>
         <button id="clearBtn" class="btn btn-secondary ms-2">Clear Logs</button>
+        
         <div id="status" class="mt-3">
             <!-- Status messages will appear here -->
         </div>
     </div>
     
     <script type="module">
-        import { runExportImport } from './apollo-to-airtable.js';
-        
-        document.getElementById('exportBtn').addEventListener('click', async () => {
-            const exportBtn = document.getElementById('exportBtn');
-            exportBtn.disabled = true;
-            exportBtn.textContent = 'Exporting...';
+        import { handleCSVImport, importToAirtable } from '../js/apollo-to-airtable.js';
+
+        document.getElementById('importBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('csvFile');
+            const importBtn = document.getElementById('importBtn');
+            
+            if (!fileInput.files.length) {
+                alert('Please select a CSV file first');
+                return;
+            }
+
+            importBtn.disabled = true;
+            importBtn.textContent = 'Importing...';
             
             try {
-                await runExportImport();
+                const records = await handleCSVImport(fileInput.files[0]);
+                if (records && records.length > 0) {
+                    await importToAirtable(records);
+                    alert('Import completed successfully!');
+                }
             } catch (error) {
-                console.error('Export failed:', error);
+                console.error('Import failed:', error);
+                alert('Import failed: ' + error.message);
             } finally {
-                exportBtn.disabled = false;
-                exportBtn.textContent = 'Run Export';
+                importBtn.disabled = false;
+                importBtn.textContent = 'Import CSV';
             }
         });
 
