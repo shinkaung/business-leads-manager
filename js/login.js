@@ -5,9 +5,9 @@ const userData = localStorage.getItem('user');
 if (userData) {
     const user = JSON.parse(userData);
     if (user.role === 'admin') {
-        window.location.href = '../index.html';
+        window.location.href = './index.html';
     } else if (user.role === 'salesman') {
-        window.location.href = './salesman.html';
+        window.location.href = './pages/salesman.html';
     }
 }
 

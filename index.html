@@ -52,7 +52,7 @@
         // Check authentication and role
         const userData = localStorage.getItem('user');
         if (!userData) {
-            window.location.replace('pages/login.html');
+            window.location.replace('./pages/login.html');
             throw new Error('No user data found');
         }
         

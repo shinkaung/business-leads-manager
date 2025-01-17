@@ -94,9 +94,9 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         // Get user role and redirect accordingly
         const userRole = getUserRole();
         if (userRole === 'admin') {
-            window.location.href = '../../index.html';
+            window.location.href = '../index.html';
         } else if (userRole === 'salesman') {
-            window.location.href = '../salesman.html';
+            window.location.href = './salesman.html';
         }
     } catch (error) {
         alert('Error updating record: ' + error.message);
