@@ -17,11 +17,15 @@ let loadingPromise = null;
 const CACHE_KEY = 'airtableCache';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// Add this constant at the top with other constants
+const VALID_STATUSES = ['New Lead', 'Qualified', 'Existing Customer'];
+
 // Export functions and constants
 export { 
     AIRTABLE_API_KEY, 
     AIRTABLE_BASE_ID, 
     AIRTABLE_TABLE_NAME,
+    VALID_STATUSES,
     createAirtableRecord,
     updateAirtableRecord,
     fetchAirtableData,
@@ -31,6 +35,12 @@ export {
 
 // Fetch data from Airtable (outlets)
 async function fetchAirtableData(forceRefresh = false) {
+    // Always clear cache if forceRefresh is true
+    if (forceRefresh) {
+        localStorage.removeItem(CACHE_KEY);
+        cachedRecords = null;
+    }
+
     // Try to get from localStorage first
     if (!forceRefresh) {
         const cached = localStorage.getItem(CACHE_KEY);
@@ -121,6 +131,17 @@ async function fetchProductsData() {
 
 async function createAirtableRecord(record) {
     try {
+        // Normalize Status field if present
+        if (record.Status) {
+            const normalizedStatus = VALID_STATUSES.find(
+                status => status.toLowerCase() === record.Status.toLowerCase()
+            );
+            if (!normalizedStatus) {
+                throw new Error(`Invalid Status value. Must be one of: ${VALID_STATUSES.join(', ')}`);
+            }
+            record.Status = normalizedStatus; // Use exact casing from valid statuses
+        }
+
         const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`, {
             method: 'POST',
             headers: {
@@ -128,14 +149,13 @@ async function createAirtableRecord(record) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                records: [{
-                    fields: record
-                }]
+                fields: record
             })
         });
 
         if (!response.ok) {
-            throw new Error('Failed to create record');
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to create record');
         }
 
         return await response.json();

@@ -5,6 +5,12 @@
     --fruit-salad: #499662;
     --brandy-punch: #c7852a;
     --pomegranate: #f44336;
+    --new-color: #ff4444;
+    --qualified-color: #ff9800;
+    --existing-color: #4caf50;
+    --status-new: #ff4444;
+    --status-qualified: #ff9800;
+    --status-existing: #4caf50;
 }
 
 /* Navbar styling */
@@ -581,6 +587,64 @@ body {
     margin-top: 1rem;
 }
 
+/* Lead Status Colors */
+.status-new {
+    background-color: #ffebee !important; /* Light red */
+    border-left: 4px solid #f44336 !important; /* Red */
+}
+
+.status-qualified {
+    background-color: #fff3e0 !important; /* Light orange */
+    border-left: 4px solid #ff9800 !important; /* Orange */
+}
+
+.status-existing {
+    background-color: #e8f5e9 !important; /* Light green */
+    border-left: 4px solid #4caf50 !important; /* Green */
+}
+
+/* Status badge styles - Keep these for status indicators */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    min-width: 100px;
+}
+
+.status-badge-new {
+    background-color: var(--status-new) !important;
+    color: white !important;
+}
+
+.status-badge-qualified {
+    background-color: var(--status-qualified) !important;
+    color: white !important;
+}
+
+.status-badge-existing {
+    background-color: var(--status-existing) !important;
+    color: white !important;
+}
+
+/* Row status styling */
+.status-new {
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    border-left: 4px solid #ff4444 !important;
+}
+
+.status-qualified {
+    background-color: rgba(0, 200, 81, 0.05) !important;
+    border-left: 4px solid #00C851 !important;
+}
+
+.status-existing {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+    border-left: 4px solid #007bff !important;
+}
+
 @media (max-width: 768px) {
     .desktop-view {
         display: none;
@@ -591,19 +655,498 @@ body {
     }
 }
 
-.btn-outline-danger {
-    color: #dc3545;
-    border-color: #dc3545;
+/* Mobile card status styling */
+.mobile-card.status-new {
+    background-color: #ffebee !important;
+    border-left: 4px solid #f44336 !important;
 }
 
-.btn-outline-danger:hover {
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
+.mobile-card.status-qualified {
+    background-color: #fff3e0 !important;
+    border-left: 4px solid #ff9800 !important;
 }
 
-.lead-card-actions {
+.mobile-card.status-existing {
+    background-color: #e8f5e9 !important;
+    border-left: 4px solid #4caf50 !important;
+}
+
+/* Mobile status badge positioning */
+.mobile-card .card-header {
+    position: relative;
+}
+
+.mobile-card .status-badge {
+    margin-left: auto;
+}
+
+/* Status-specific button colors */
+.mobile-card.status-new .btn-primary,
+.status-new .btn-primary {
+    background-color: #f44336 !important; /* Red for new leads */
+    border-color: #f44336 !important;
+    color: white !important;
+}
+
+.mobile-card.status-qualified .btn-primary,
+.status-qualified .btn-primary {
+    background-color: #ff9800 !important; /* Orange for qualified */
+    border-color: #ff9800 !important;
+    color: white !important;
+}
+
+.mobile-card.status-existing .btn-primary,
+.status-existing .btn-primary {
+    background-color: #4caf50 !important; /* Green for existing */
+    border-color: #4caf50 !important;
+    color: white !important;
+}
+
+/* View Details button styling */
+.mobile-card.status-new .btn-secondary,
+.status-new .btn-secondary {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+    border-color: #f44336 !important;
+    color: #f44336 !important;
+}
+
+.mobile-card.status-qualified .btn-secondary,
+.status-qualified .btn-secondary {
+    background-color: rgba(255, 152, 0, 0.1) !important;
+    border-color: #ff9800 !important;
+    color: #ff9800 !important;
+}
+
+.mobile-card.status-existing .btn-secondary,
+.status-existing .btn-secondary {
+    background-color: rgba(76, 175, 80, 0.1) !important;
+    border-color: #4caf50 !important;
+    color: #4caf50 !important;
+}
+
+/* Hover effects */
+.mobile-card.status-new .btn:hover,
+.status-new .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.mobile-card.status-qualified .btn:hover,
+.status-qualified .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.mobile-card.status-existing .btn:hover,
+.status-existing .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* View Details button */
+.view-details-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Action buttons container */
+.action-buttons {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Keep existing mobile card styling */
+.mobile-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Update mobile card status colors (keep your existing colors) */
+.mobile-card.status-new {
+    background-color: #ffebee !important;
+    border-left: 4px solid #f44336 !important;
+}
+
+.mobile-card.status-qualified {
+    background-color: #fff3e0 !important;
+    border-left: 4px solid #ff9800 !important;
+}
+
+.mobile-card.status-existing {
+    background-color: #e8f5e9 !important;
+    border-left: 4px solid #4caf50 !important;
+}
+
+/* Status badge colors */
+.status-badge-new, 
+.status-new .view-details-btn,
+.status-new .btn-primary {
+    background-color: var(--new-color) !important;
+    border-color: var(--new-color) !important;
+    color: white !important;
+}
+
+.status-badge-qualified,
+.status-qualified .view-details-btn,
+.status-qualified .btn-primary {
+    background-color: var(--qualified-color) !important;
+    border-color: var(--qualified-color) !important;
+    color: white !important;
+}
+
+.status-badge-existing,
+.status-existing .view-details-btn,
+.status-existing .btn-primary {
+    background-color: var(--existing-color) !important;
+    border-color: var(--existing-color) !important;
+    color: white !important;
+}
+
+/* Row and card background colors */
+.status-new, .mobile-card.status-new {
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    border-left: 4px solid var(--new-color) !important;
+}
+
+.status-qualified, .mobile-card.status-qualified {
+    background-color: rgba(255, 152, 0, 0.05) !important;
+    border-left: 4px solid var(--qualified-color) !important;
+}
+
+.status-existing, .mobile-card.status-existing {
+    background-color: rgba(76, 175, 80, 0.05) !important;
+    border-left: 4px solid var(--existing-color) !important;
+}
+
+/* Status Colors - Base colors for everything */
+:root {
+    --new-color: #ff4444;
+    --qualified-color: #ff9800;
+    --existing-color: #4caf50;
+    --east-bay: #435a8d;
+    --port-gore: #19193e;
+    --pomegranate: #f44336;
+}
+
+/* Status badge colors - Only for status badges */
+.status-badge-new {
+    background-color: var(--new-color) !important;
+    color: white !important;
+}
+
+.status-badge-qualified {
+    background-color: var(--qualified-color) !important;
+    color: white !important;
+}
+
+.status-badge-existing {
+    background-color: var(--existing-color) !important;
+    color: white !important;
+}
+
+/* Row and card background colors */
+.status-new, .mobile-card.status-new {
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    border-left: 4px solid var(--new-color) !important;
+}
+
+.status-qualified, .mobile-card.status-qualified {
+    background-color: rgba(255, 152, 0, 0.05) !important;
+    border-left: 4px solid var(--qualified-color) !important;
+}
+
+.status-existing, .mobile-card.status-existing {
+    background-color: rgba(76, 175, 80, 0.05) !important;
+    border-left: 4px solid var(--existing-color) !important;
+}
+
+/* Action buttons - Standard colors */
+.btn-primary {
+    background-color: var(--east-bay) !important;
+    border-color: var(--east-bay) !important;
+}
+
+.btn-danger {
+    background-color: var(--pomegranate) !important;
+    border-color: var(--pomegranate) !important;
+}
+
+/* Status badge colors */
+.status-badge-new {
+    background-color: var(--status-new) !important;
+    color: white !important;
+}
+
+.status-badge-qualified {
+    background-color: var(--status-qualified) !important;
+    color: white !important;
+}
+
+.status-badge-existing {
+    background-color: var(--status-existing) !important;
+    color: white !important;
+}
+
+/* Row and card background colors */
+.status-new, .mobile-card.status-new {
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    border-left: 4px solid var(--new-color) !important;
+}
+
+.status-qualified, .mobile-card.status-qualified {
+    background-color: rgba(255, 152, 0, 0.05) !important;
+    border-left: 4px solid var(--qualified-color) !important;
+}
+
+.status-existing, .mobile-card.status-existing {
+    background-color: rgba(76, 175, 80, 0.05) !important;
+    border-left: 4px solid var(--existing-color) !important;
+}
+
+/* Remove status-based button styling */
+.status-new .btn-primary,
+.status-qualified .btn-primary,
+.status-existing .btn-primary,
+.status-new .view-details-btn,
+.status-qualified .view-details-btn,
+.status-existing .view-details-btn {
+    background-color: inherit !important;
+    border-color: inherit !important;
+    color: inherit !important;
+}
+
+/* Add consistent edit button styling */
+.edit-btn {
+    color: #0d6efd !important; /* Bootstrap primary blue */
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.delete-btn {
+    color: #dc3545 !important; /* Bootstrap danger red */
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Remove hover effects from status-based styling */
+.status-new .btn:hover,
+.status-qualified .btn:hover,
+.status-existing .btn:hover {
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+/* Remove status-based button styling and add consistent button colors */
+.edit-btn, 
+button[onclick*="editLead"] {
+    color: #435a8d !important; /* East Bay blue */
+    background-color: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+}
+
+.delete-btn,
+button[onclick*="deleteLead"] {
+    color: #f44336 !important; /* Pomegranate red */
+    background-color: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+}
+
+/* Remove any status-based overrides */
+.status-new .btn-primary,
+.status-qualified .btn-primary,
+.status-existing .btn-primary,
+.mobile-card.status-new .btn,
+.mobile-card.status-qualified .btn,
+.mobile-card.status-existing .btn {
+    background-color: inherit;
+    border-color: inherit;
+    color: inherit;
+}
+
+/* Add hover effects for the buttons */
+.edit-btn:hover,
+button[onclick*="editLead"]:hover {
+    color: #19193e !important; /* Darker blue */
+    background-color: rgba(67, 90, 141, 0.1) !important;
+}
+
+.delete-btn:hover,
+button[onclick*="deleteLead"]:hover {
+    color: #d32f2f !important; /* Darker red */
+    background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+/* Action buttons - Consistent styling regardless of status */
+button[onclick*="editLead"],
+.edit-btn {
+    background-color: #435a8d !important; /* East Bay blue */
+    border-color: #435a8d !important;
+    color: white !important;
+}
+
+button[onclick*="deleteLead"],
+.delete-btn {
+    background-color: #f44336 !important; /* Pomegranate red */
+    border-color: #f44336 !important;
+    color: white !important;
+}
+
+/* Hover effects for action buttons */
+button[onclick*="editLead"]:hover,
+.edit-btn:hover {
+    background-color: #19193e !important; /* Darker blue */
+    border-color: #19193e !important;
+}
+
+button[onclick*="deleteLead"]:hover,
+.delete-btn:hover {
+    background-color: #d32f2f !important; /* Darker red */
+    border-color: #d32f2f !important;
+}
+
+/* Mobile view specific styles */
+@media (max-width: 768px) {
+    .mobile-card .action-buttons button[onclick*="editLead"],
+    .mobile-card .action-buttons .edit-btn {
+        background-color: #435a8d !important;
+        border-color: #435a8d !important;
+        color: white !important;
+    }
+
+    .mobile-card .action-buttons button[onclick*="deleteLead"],
+    .mobile-card .action-buttons .delete-btn {
+        background-color: #f44336 !important;
+        border-color: #f44336 !important;
+        color: white !important;
+    }
+}
+
+/* Override any status-based button styling */
+.status-new button[onclick*="editLead"],
+.status-qualified button[onclick*="editLead"],
+.status-existing button[onclick*="editLead"],
+.status-new .edit-btn,
+.status-qualified .edit-btn,
+.status-existing .edit-btn {
+    background-color: #435a8d !important;
+    border-color: #435a8d !important;
+    color: white !important;
+}
+
+.status-new button[onclick*="deleteLead"],
+.status-qualified button[onclick*="deleteLead"],
+.status-existing button[onclick*="deleteLead"],
+.status-new .delete-btn,
+.status-qualified .delete-btn,
+.status-existing .delete-btn {
+    background-color: #f44336 !important;
+    border-color: #f44336 !important;
+    color: white !important;
+}
+
+.loading-container {
+    position: relative;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 10px;
+}
+
+.loading-container .progress {
+    background-color: #e9ecef;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container .text-center {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.sorting-container {
+    margin: 0 15px;
+}
+
+.sorting-container select {
+    min-width: 200px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Action buttons styling */
+.btn-group {
+    display: flex;
+    gap: 8px;
+}
+
+/* Edit button styling */
+button[onclick*="editRecord"],
+.edit-btn {
+    background-color: transparent !important;
+    color: #435a8d !important;
+    border: 1px solid #435a8d !important;
+    padding: 4px 12px !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+button[onclick*="editRecord"]:hover,
+.edit-btn:hover {
+    background-color: #435a8d !important;
+    color: white !important;
+}
+
+/* Delete button styling */
+button[onclick*="deleteRecord"],
+.delete-btn {
+    background-color: transparent !important;
+    color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+    padding: 4px 12px !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+button[onclick*="deleteRecord"]:hover,
+.delete-btn:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Icon styling within buttons */
+button[onclick*="editRecord"] i,
+button[onclick*="deleteRecord"] i,
+.edit-btn i,
+.delete-btn i {
+    font-size: 0.9em !important;
+}
+
+/* Override any Bootstrap button styles */
+.btn-sm {
+    padding: 4px 12px !important;
+    font-size: 0.875rem !important;
+}
+
+/* Ensure consistent button sizing */
+.table td .btn-group .btn {
+    height: 32px !important;
+    line-height: 1 !important;
 }

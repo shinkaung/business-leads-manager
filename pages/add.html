@@ -124,6 +124,16 @@
                     <textarea class="form-control" name="Remarks" id="Remarks" rows="3"></textarea>
                 </div>
 
+                <!-- Add this before the Submit Button section -->
+                <div class="col-md-6">
+                    <label for="Status" class="form-label">Status</label>
+                    <select class="form-control" name="Status" id="Status">
+                        <option value="new lead">New Lead</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="existing customer">Existing Customer</option>
+                    </select>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Save Record</button>

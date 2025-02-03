@@ -9,13 +9,29 @@ function editLead(id) {
 }
 
 async function loadLeads() {
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
     if (!tableBody || !leadsList) {
         console.error('Required containers not found');
         return;
     }
 
     try {
-        const leads = await fetchAirtableData();
+        // Check URL parameters for force refresh
+        const urlParams = new URLSearchParams(window.location.search);
+        const forceRefresh = urlParams.has('forceRefresh');
+
+        // Clear cache if force refresh is requested
+        if (forceRefresh) {
+            localStorage.removeItem('airtableCache');
+            // Clean up URL parameters without refreshing the page
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
+        const leads = await fetchAirtableData(forceRefresh);
         if (!leads || leads.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="7">No leads found</td></tr>';
             leadsList.innerHTML = '<div class="no-leads">No leads found</div>';
@@ -36,6 +52,9 @@ async function loadLeads() {
             leadsList.appendChild(card);
         });
 
+        // Update total records count
+        updateRecordCount(leads.length);
+
         // Setup search functionality
         setupSearch();
 
@@ -43,12 +62,25 @@ async function loadLeads() {
         console.error('Error loading leads:', error);
         tableBody.innerHTML = '<tr><td colspan="7">Failed to load leads</td></tr>';
         leadsList.innerHTML = '<div class="error">Failed to load leads</div>';
+    } finally {
+        // Hide loading overlay
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
+    }
+}
+
+// Add function to update record count
+function updateRecordCount(count) {
+    const countElement = document.querySelector('.records-counter strong');
+    if (countElement) {
+        countElement.textContent = count;
     }
 }
 
 function createTableRow(lead) {
+    const status = lead.fields['Status'] || 'new lead';
+    const statusClass = getStatusClass(status);
     return `
-        <tr>
+        <tr class="${statusClass}">
             <td>${lead.fields['Contact Person'] || '-'}</td>
             <td>${lead.fields['Position'] || '-'}</td>
             <td>${lead.fields['Tel'] || '-'}</td>
@@ -68,6 +100,11 @@ function createTableRow(lead) {
             <td>${lead.fields['Follow Up Actions'] || '-'}</td>
             <td>${lead.fields['Remarks'] || '-'}</td>
             <td>
+                <span class="status-badge ${getStatusBadgeClass(status)}">
+                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                </span>
+            </td>
+            <td>
                 <button class="btn btn-sm btn-outline-primary" 
                         onclick="editLead('${lead.id}')">
                     <i class="bi bi-pencil"></i> Edit
@@ -78,11 +115,18 @@ function createTableRow(lead) {
 }
 
 function createLeadCard(lead) {
+    const status = lead.fields['Status'] || 'new lead';
+    const statusClass = getStatusClass(status);
     const div = document.createElement('div');
-    div.className = 'lead-card';
+    div.className = `lead-card ${statusClass}`;
     div.innerHTML = `
         <div class="lead-card-header">
-            <h4>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</h4>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</h4>
+                <span class="status-badge ${getStatusBadgeClass(status)}">
+                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                </span>
+            </div>
             <div class="lead-card-basic-info">
                 <p><strong>Contact:</strong> ${lead.fields['Contact Person'] || 'No contact person'}</p>
                 <p><strong>Position:</strong> ${lead.fields['Position'] || '-'}</p>
@@ -157,6 +201,37 @@ function setupSearch() {
             card.style.display = text.includes(searchTerm) ? '' : 'none';
         });
     });
+}
+
+// Add these helper functions
+function getStatusClass(status) {
+    const normalizedStatus = (status || '').toLowerCase().trim();
+    
+    switch(normalizedStatus) {
+        case 'qualified':
+            return 'status-qualified';
+        case 'existing customer':
+            return 'status-existing';
+        case 'new lead':
+            return 'status-new';
+        default:
+            return ''; // No special styling for unknown status
+    }
+}
+
+function getStatusBadgeClass(status) {
+    const normalizedStatus = (status || '').toLowerCase().trim();
+    
+    switch(normalizedStatus) {
+        case 'qualified':
+            return 'status-badge-qualified';
+        case 'existing customer':
+            return 'status-badge-existing';
+        case 'new lead':
+            return 'status-badge-new';
+        default:
+            return 'status-badge-new'; // Default to new lead if status is unknown
+    }
 }
 
 // Make editLead available globally
