@@ -15,6 +15,7 @@
     <script type="module" src="js/shared/search.js" defer></script>
     
     <!-- Add a loading indicator -->
+    <!--
     <style>
         .loading-overlay {
             position: fixed;
@@ -41,11 +42,15 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+    -->
 </head>
 <body>
-    <!-- Add loading overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
+    <!-- Replace the old loading overlay with the new loading bar -->
+    <div id="loadingOverlay" class="loading-container">
+        <div class="progress" style="height: 5px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+        </div>
+        <div class="text-center mt-2">Loading records...</div>
     </div>
     
     <script type="module">

@@ -1054,22 +1054,42 @@ button[onclick*="deleteLead"]:hover,
     color: white !important;
 }
 
+/* Loading Bar Styles */
 .loading-container {
-    position: relative;
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
 }
 
 .loading-container .progress {
+    max-width: 500px;
+    margin: 0 auto;
     background-color: #e9ecef;
     border-radius: 3px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.loading-container .progress-bar {
+    background-color: var(--east-bay);
+}
+
 .loading-container .text-center {
     color: #6c757d;
     font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Add animation for smoother appearance/disappearance */
+.loading-container {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.loading-container[style*="display: none"] {
+    opacity: 0;
 }
 
 .sorting-container {

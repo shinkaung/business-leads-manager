@@ -5,37 +5,44 @@ let records = [];
 
 // Function declarations that will be exported
 export function renderRecords(records) {
-    const tbody = document.querySelector('#dataTable tbody');
-    const mobileCards = document.querySelector('.mobile-cards');
+    showLoading(); // Show loading bar before starting render
     
-    // Clear existing content
-    tbody.innerHTML = '';
-    mobileCards.innerHTML = '';
-    
-    // Apply area filter if selected
-    const areaFilter = document.getElementById('areaFilter');
-    if (areaFilter && areaFilter.value) {
-        records = filterByPostalDistrict(records, areaFilter.value);
-    }
-    
-    records.forEach(record => {
-        // Render table row
-        tbody.innerHTML += createTableRow(record);
+    try {
+        const tbody = document.querySelector('#dataTable tbody');
+        const mobileCards = document.querySelector('.mobile-cards');
         
-        // Render mobile card
-        mobileCards.innerHTML += createMobileCard(record);
-    });
+        // Clear existing content
+        tbody.innerHTML = '';
+        mobileCards.innerHTML = '';
+        
+        // Apply area filter if selected
+        const areaFilter = document.getElementById('areaFilter');
+        if (areaFilter && areaFilter.value) {
+            records = filterByPostalDistrict(records, areaFilter.value);
+        }
+        
+        records.forEach(record => {
+            // Render table row
+            tbody.innerHTML += createTableRow(record);
+            
+            // Render mobile card
+            mobileCards.innerHTML += createMobileCard(record);
+        });
 
-    // Setup mobile card listeners after rendering
-    setupMobileCardListeners();
-    
-    // Update record count
-    updateRecordCount(records.length);
+        // Setup mobile card listeners after rendering
+        setupMobileCardListeners();
+        
+        // Update record count
+        updateRecordCount(records.length);
+    } finally {
+        // Hide loading bar after everything is done
+        setTimeout(() => hideLoading(), 300); // Add small delay to ensure UI updates are visible
+    }
 }
 
 async function initializeApp() {
     const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    if (loadingOverlay) loadingOverlay.style.display = 'block';
 
     try {
         // Check URL parameters for force refresh
@@ -226,15 +233,20 @@ function updateRecordCount(count) {
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
+        let debounceTimer;
         searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredRecords = records.filter(record => 
-                record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
-                record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
-                record.fields['Address']?.toLowerCase().includes(searchTerm)
-            );
-            renderRecords(filteredRecords);
-            updateRecordCount(filteredRecords.length);
+            showLoading(); // Show loading when search starts
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredRecords = records.filter(record => 
+                    record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
+                    record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
+                    record.fields['Address']?.toLowerCase().includes(searchTerm)
+                );
+                renderRecords(filteredRecords);
+                updateRecordCount(filteredRecords.length);
+            }, 300);
         });
     }
 }
@@ -261,16 +273,25 @@ async function deleteRecord(id) {
         return;
     }
 
+    showLoading(); // Show loading before delete operation
     try {
         await deleteAirtableRecord(id);
         // Remove from local records array
         records = records.filter(r => r.id !== id);
-        // Re-render the table
+        
+        // Clear search input and re-render all records
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
         renderRecords(records);
+        
         alert('Record deleted successfully');
     } catch (error) {
         console.error('Error deleting record:', error);
         alert('Error deleting record: ' + error.message);
+    } finally {
+        hideLoading(); // Hide loading after operation completes
     }
 }
 
@@ -452,9 +473,12 @@ function initializeAreaFilter() {
         `<option value="${option.value}">${option.label}</option>`
     ).join('');
 
-    // Add event listener for area filter
+    // Update the event listener to show loading
     areaFilter.addEventListener('change', () => {
-        renderRecords(records);
+        showLoading(); // Show loading when filter changes
+        setTimeout(() => {
+            renderRecords(records);
+        }, 100); // Small delay to ensure loading bar appears
     });
 }
 
@@ -467,3 +491,14 @@ window.logout = function() {
     sessionStorage.clear();
     window.location.replace('./pages/login.html');
 };
+
+// Add this helper function at the top with other function declarations
+function showLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'block';
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+}

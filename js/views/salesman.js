@@ -8,10 +8,19 @@ function editLead(id) {
     window.location.href = `../pages/edit.html?id=${id}&returnTo=${returnTo}`;
 }
 
-async function loadLeads() {
-    // Show loading overlay
+// Add these helper functions at the top
+function showLoading() {
     const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    if (loadingOverlay) loadingOverlay.style.display = 'block';
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+}
+
+async function loadLeads() {
+    showLoading(); // Show loading bar
 
     if (!tableBody || !leadsList) {
         console.error('Required containers not found');
@@ -63,8 +72,8 @@ async function loadLeads() {
         tableBody.innerHTML = '<tr><td colspan="7">Failed to load leads</td></tr>';
         leadsList.innerHTML = '<div class="error">Failed to load leads</div>';
     } finally {
-        // Hide loading overlay
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
+        // Hide loading with a small delay to ensure UI updates are visible
+        setTimeout(() => hideLoading(), 300);
     }
 }
 
@@ -184,22 +193,34 @@ function setupSearch() {
     const searchInput = document.querySelector('#searchInput');
     if (!searchInput) return;
 
+    let debounceTimer;
     searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const tableRows = document.querySelectorAll('.table tbody tr');
-        const mobileCards = document.querySelectorAll('.lead-card');
+        showLoading(); // Show loading when search starts
+        clearTimeout(debounceTimer);
+        
+        debounceTimer = setTimeout(() => {
+            const searchTerm = e.target.value.toLowerCase();
+            const tableRows = document.querySelectorAll('.table tbody tr');
+            const mobileCards = document.querySelectorAll('.lead-card');
 
-        // Filter table rows
-        tableRows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+            // Filter table rows
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
 
-        // Filter mobile cards
-        mobileCards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+            // Filter mobile cards
+            mobileCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+
+            // Update visible record count
+            const visibleRows = document.querySelectorAll('.table tbody tr:not([style*="display: none"])').length;
+            updateRecordCount(visibleRows);
+            
+            hideLoading(); // Hide loading after search completes
+        }, 300);
     });
 }
 
