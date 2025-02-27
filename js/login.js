@@ -5,9 +5,11 @@ const userData = localStorage.getItem('user');
 if (userData) {
     const user = JSON.parse(userData);
     if (user.role === 'admin') {
-        window.location.href = './index.html';
+        window.location.href = '../index.html';
     } else if (user.role === 'salesman') {
-        window.location.href = './pages/salesman.html';
+        window.location.href = './salesman.html';
+    } else if (user.role === 'region_manager') {
+        window.location.href = './region-manager.html';
     }
 }
 
@@ -26,21 +28,22 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             // Store user data in localStorage
             localStorage.setItem('user', JSON.stringify({
                 username: authResult.username,
-                role: authResult.role.toLowerCase()
+                role: authResult.role.toLowerCase(),
+                region: authResult.region
             }));
 
-            // Handle redirects based on role
-            const role = authResult.role.toLowerCase();
-            if (role === 'admin') {
-                window.location.replace('../index.html');
-            } else if (role === 'salesperson') {
-                window.location.replace('./salesman.html');
+            // Redirect based on role with correct paths
+            if (authResult.role.toLowerCase() === 'admin') {
+                window.location.href = '../index.html';
+            } else if (authResult.role.toLowerCase() === 'salesman') {
+                window.location.href = './salesman.html';
+            } else if (authResult.role.toLowerCase() === 'region_manager') {
+                window.location.href = './region-manager.html';
             } else {
-                alert('Invalid user role: ' + authResult.role);
-                localStorage.clear();
+                throw new Error('Invalid role assigned');
             }
         } else {
-            alert('Invalid username or password');
+            throw new Error('Authentication failed');
         }
     } catch (error) {
         console.error('Login error:', error);

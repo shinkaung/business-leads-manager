@@ -101,13 +101,12 @@ async function loadRecord() {
     }
 }
 
-// Add form submit handler
+// Update form submit handler
 document.getElementById('editRecordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const urlParams = new URLSearchParams(window.location.search);
     const recordId = urlParams.get('id');
-    const returnTo = urlParams.get('returnTo') || 'index'; // Get the return path
     
     const formData = new FormData(e.target);
     const record = {};
@@ -124,30 +123,32 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         await updateAirtableRecord(recordId, record);
         alert('Record updated successfully!');
         
-        // Clear ALL cache
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Force reload with cache busting
-        const timestamp = new Date().getTime();
-        
-        // Determine redirect URL based on returnTo parameter
-        let redirectUrl;
-        if (returnTo === 'salesman') {
-            redirectUrl = './salesman.html';
-        } else {
-            redirectUrl = '../index.html'; // Default to admin page
-        }
-        
-        // Preserve user authentication data before clearing cache
+        // Preserve user authentication data
         const userData = JSON.parse(localStorage.getItem('user'));
         
-        // Clear cache
+        // Clear cache but preserve auth
         localStorage.clear();
         sessionStorage.clear();
-        
-        // Restore user authentication data
         localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Get user role and redirect accordingly
+        const userRole = userData.role;
+        const timestamp = new Date().getTime();
+        let redirectUrl;
+
+        switch(userRole) {
+            case 'admin':
+                redirectUrl = '../index.html';
+                break;
+            case 'salesman':
+                redirectUrl = './salesman.html';
+                break;
+            case 'region_manager':
+                redirectUrl = './region-manager.html';
+                break;
+            default:
+                redirectUrl = '../pages/login.html';
+        }
         
         // Redirect with cache busting
         window.location.href = `${redirectUrl}?forceRefresh=true&t=${timestamp}`;
@@ -157,7 +158,20 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
 });
 
 function goBack() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const returnTo = urlParams.get('returnTo') || 'index';
-    window.location.href = returnTo === 'salesman' ? './salesman.html' : '../index.html';
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userRole = userData.role;
+    
+    switch(userRole) {
+        case 'admin':
+            window.location.href = '../index.html';
+            break;
+        case 'salesman':
+            window.location.href = './salesman.html';
+            break;
+        case 'region_manager':
+            window.location.href = './region-manager.html';
+            break;
+        default:
+            window.location.href = './login.html';
+    }
 } 

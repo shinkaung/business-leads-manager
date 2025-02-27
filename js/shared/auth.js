@@ -30,10 +30,19 @@ export async function authenticateUser(username, password) {
                 return { success: false };
             }
 
+            // Normalize role names
+            let normalizedRole = userRole.toLowerCase();
+            if (normalizedRole === 'regionmanager') {
+                normalizedRole = 'region_manager';
+            } else if (normalizedRole === 'salesperson') {
+                normalizedRole = 'salesman';
+            }
+
             return {
                 success: true,
-                role: userRole.toLowerCase(),
-                username: user.fields.username
+                role: normalizedRole,
+                username: user.fields.username,
+                region: user.fields.Region || user.fields.region // Also capture region information
             };
         }
         
