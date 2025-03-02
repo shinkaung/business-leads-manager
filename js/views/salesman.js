@@ -20,7 +20,7 @@ function hideLoading() {
 }
 
 async function loadLeads() {
-    showLoading(); // Show loading bar
+    showLoading();
 
     if (!tableBody || !leadsList) {
         console.error('Required containers not found');
@@ -28,52 +28,51 @@ async function loadLeads() {
     }
 
     try {
-        // Check URL parameters for force refresh
         const urlParams = new URLSearchParams(window.location.search);
         const forceRefresh = urlParams.has('forceRefresh');
+        const userData = JSON.parse(localStorage.getItem('user'));
+        const userRegion = userData?.region;
 
-        // Clear cache if force refresh is requested
-        if (forceRefresh) {
-            localStorage.removeItem('airtableCache');
-            // Clean up URL parameters without refreshing the page
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, newUrl);
-        }
-
-        const leads = await fetchAirtableData(forceRefresh);
-        if (!leads || leads.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7">No leads found</td></tr>';
-            leadsList.innerHTML = '<div class="no-leads">No leads found</div>';
+        if (!userRegion) {
+            tableBody.innerHTML = '<tr><td colspan="20">No region assigned to your account</td></tr>';
+            leadsList.innerHTML = '<div class="error">No region assigned to your account</div>';
+            hideLoading();
             return;
         }
 
-        // Clear existing content
+        const leads = await fetchAirtableData(forceRefresh);
+        
+        // Filter leads based on exact match with assigned_to field
+        const filteredLeads = leads.filter(lead => {
+            const leadRegion = lead.fields.assigned_to;
+            return leadRegion === userRegion;  // Exact match comparison
+        });
+
+        if (!filteredLeads || filteredLeads.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="20">No leads found for your region</td></tr>';
+            leadsList.innerHTML = '<div class="no-leads">No leads found for your region</div>';
+            hideLoading();
+            return;
+        }
+
         tableBody.innerHTML = '';
         leadsList.innerHTML = '';
 
-        // Populate both views
-        leads.forEach(lead => {
-            // Add table row for desktop view
+        filteredLeads.forEach(lead => {
             tableBody.innerHTML += createTableRow(lead);
-            
-            // Add card for mobile view
             const card = createLeadCard(lead);
             leadsList.appendChild(card);
         });
 
-        // Update total records count
-        updateRecordCount(leads.length);
-
-        // Setup search functionality
+        updateRecordCount(filteredLeads.length);
         setupSearch();
 
     } catch (error) {
         console.error('Error loading leads:', error);
-        tableBody.innerHTML = '<tr><td colspan="7">Failed to load leads</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="20">Failed to load leads</td></tr>';
         leadsList.innerHTML = '<div class="error">Failed to load leads</div>';
     } finally {
-        // Hide loading with a small delay to ensure UI updates are visible
-        setTimeout(() => hideLoading(), 300);
+        hideLoading();
     }
 }
 
@@ -259,4 +258,27 @@ function getStatusBadgeClass(status) {
 window.editLead = editLead;
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', loadLeads); 
+document.addEventListener('DOMContentLoaded', () => {
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+        window.location.href = '../pages/login.html';
+        return;
+    }
+
+    const user = JSON.parse(userData);
+    const userRole = user.role.toLowerCase();
+    
+    // Only redirect if not a salesman
+    if (userRole !== 'salesman' && userRole !== 'salesperson') {
+        window.location.href = '../pages/login.html';
+        return;
+    }
+
+    // Display username and region without redirecting
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay && user.username) {
+        userDisplay.textContent = `Welcome, ${user.username} (${user.region || 'No Region'})`;
+    }
+
+    loadLeads();
+}); 

@@ -4,12 +4,17 @@ import { authenticateUser } from '../js/shared/auth.js';
 const userData = localStorage.getItem('user');
 if (userData) {
     const user = JSON.parse(userData);
-    if (user.role === 'admin') {
-        window.location.href = '../index.html';
-    } else if (user.role === 'salesman') {
-        window.location.href = './salesman.html';
-    } else if (user.role === 'region_manager') {
-        window.location.href = './region-manager.html';
+    const currentPath = window.location.pathname;
+    
+    // Only redirect if we're on the login page
+    if (currentPath.includes('login.html')) {
+        if (user.role === 'admin') {
+            window.location.href = '../index.html';
+        } else if (user.role.toLowerCase() === 'salesman') {
+            window.location.href = './salesman.html';
+        } else if (user.role.toLowerCase() === 'region_manager') {
+            window.location.href = './region-manager.html';
+        }
     }
 }
 
@@ -20,11 +25,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
     
     try {
-        console.log('Attempting login for:', username);
         const authResult = await authenticateUser(username, password);
-        console.log('Auth result:', authResult);
         
-        if (authResult.success && authResult.role) {
+        if (authResult.success) {
             // Store user data in localStorage
             localStorage.setItem('user', JSON.stringify({
                 username: authResult.username,
@@ -32,18 +35,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 region: authResult.region
             }));
 
-            // Redirect based on role with correct paths
-            if (authResult.role.toLowerCase() === 'admin') {
+            // Redirect based on role
+            if (authResult.role === 'admin') {
                 window.location.href = '../index.html';
-            } else if (authResult.role.toLowerCase() === 'salesman') {
+            } else if (authResult.role === 'salesman') {
                 window.location.href = './salesman.html';
-            } else if (authResult.role.toLowerCase() === 'region_manager') {
+            } else if (authResult.role === 'region_manager') {
                 window.location.href = './region-manager.html';
-            } else {
-                throw new Error('Invalid role assigned');
             }
         } else {
-            throw new Error('Authentication failed');
+            // Show specific error message if provided
+            const errorMessage = authResult.error || 'Authentication failed';
+            alert(errorMessage);
         }
     } catch (error) {
         console.error('Login error:', error);

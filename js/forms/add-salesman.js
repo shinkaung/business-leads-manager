@@ -3,7 +3,12 @@ import { initializeAutocomplete } from '../shared/autocomplete.js';
 
 // Check if user is authorized
 const userData = localStorage.getItem('user');
-if (!userData || JSON.parse(userData).role.toLowerCase() !== 'salesperson') {
+if (!userData) {
+    window.location.href = '../pages/login.html';
+}
+
+const user = JSON.parse(userData);
+if (user.role.toLowerCase() !== 'salesman') {
     window.location.href = '../pages/login.html';
 }
 
@@ -16,10 +21,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Soju Products': 'sojuProductsList'
     };
 
-    // Initialize autocomplete
     await initializeAutocomplete();
 
-    // Initialize autocomplete for each field
     Object.entries(autocompleteFields).forEach(([fieldId, listId]) => {
         const input = document.querySelector(`input[name="${fieldId}"]`);
         if (input) {
@@ -30,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupFormSubmission();
 });
 
-// Add the missing setupInputListener function
 function setupInputListener(fieldId, listId, input) {
     const datalist = document.getElementById(listId);
     if (!datalist) return;
@@ -64,24 +66,31 @@ function setupFormSubmission() {
             if (value) record[key] = value;
         });
 
+        // Get user's region and ensure it's set
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData?.region) {
+            alert('Error: No region assigned to your account');
+            return;
+        }
+
+        // Always set the assigned_to field to the user's region
+        record.assigned_to = userData.region;
+        
+        // Set default status for new leads if not specified
+        if (!record.Status) {
+            record.Status = 'new lead';
+        }
+
         try {
             await createAirtableRecord(record);
             alert('Lead added successfully!');
             
             // Preserve user authentication data
-            const userData = JSON.parse(localStorage.getItem('user'));
-            
-            // Clear ALL cache to force fresh data fetch
             localStorage.clear();
             sessionStorage.clear();
-            
-            // Restore user authentication data
             localStorage.setItem('user', JSON.stringify(userData));
             
-            // Add timestamp for cache busting
             const timestamp = new Date().getTime();
-            
-            // Redirect with cache busting parameters
             window.location.href = `salesman.html?forceRefresh=true&t=${timestamp}`;
         } catch (error) {
             alert('Error adding lead: ' + error.message);

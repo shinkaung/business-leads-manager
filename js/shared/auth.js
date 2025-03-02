@@ -23,7 +23,10 @@ export async function authenticateUser(username, password) {
         if (data.records && data.records.length > 0) {
             const user = data.records[0];
             console.log('Found user:', user);
+            
+            // Get role and assigned_to directly from fields
             const userRole = user.fields.Role || user.fields.role;
+            const assignedRegion = user.fields.assigned_to;  // Use exactly as stored in Airtable
             
             if (!userRole) {
                 console.error('Role not found in user data:', user.fields);
@@ -38,11 +41,19 @@ export async function authenticateUser(username, password) {
                 normalizedRole = 'salesman';
             }
 
+            // Check if salesperson has an assigned region
+            if (normalizedRole === 'salesman' && !assignedRegion) {
+                return { 
+                    success: false, 
+                    error: 'No region assigned to your account. Please contact your administrator.' 
+                };
+            }
+
             return {
                 success: true,
                 role: normalizedRole,
                 username: user.fields.username,
-                region: user.fields.Region || user.fields.region // Also capture region information
+                region: assignedRegion  // Store the exact value from Airtable
             };
         }
         

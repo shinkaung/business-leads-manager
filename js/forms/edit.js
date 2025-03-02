@@ -30,6 +30,9 @@ function initializeStatusDropdown() {
 async function loadRecord() {
     const urlParams = new URLSearchParams(window.location.search);
     const recordId = urlParams.get('id');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userRegion = userData?.region;
+    const userRole = userData?.role?.toLowerCase();
     
     if (!recordId) {
         alert('No record ID provided');
@@ -43,6 +46,13 @@ async function loadRecord() {
         
         if (!record) {
             alert('Record not found');
+            goBack();
+            return;
+        }
+
+        // Check if salesman is trying to edit a record not in their region
+        if (userRole === 'salesman' && record.fields.assigned_to !== userRegion) {
+            alert('You do not have permission to edit this record');
             goBack();
             return;
         }
@@ -115,6 +125,16 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         if (value) record[key] = value;
     });
 
+    // Preserve the assigned_to field for salespeople
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userRole = userData?.role?.toLowerCase();
+    const userRegion = userData?.region;
+
+    if (userRole === 'salesman') {
+        // Ensure the assigned_to field stays the same for salespeople
+        record.assigned_to = userRegion;
+    }
+
     try {
         if (record.Status && !VALID_STATUSES.includes(record.Status)) {
             throw new Error(`Invalid Status value. Must be one of: ${VALID_STATUSES.join(', ')}`);
@@ -123,16 +143,11 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         await updateAirtableRecord(recordId, record);
         alert('Record updated successfully!');
         
-        // Preserve user authentication data
-        const userData = JSON.parse(localStorage.getItem('user'));
-        
         // Clear cache but preserve auth
         localStorage.clear();
         sessionStorage.clear();
         localStorage.setItem('user', JSON.stringify(userData));
         
-        // Get user role and redirect accordingly
-        const userRole = userData.role;
         const timestamp = new Date().getTime();
         let redirectUrl;
 
@@ -150,7 +165,6 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
                 redirectUrl = '../pages/login.html';
         }
         
-        // Redirect with cache busting
         window.location.href = `${redirectUrl}?forceRefresh=true&t=${timestamp}`;
     } catch (error) {
         alert('Error updating record: ' + error.message);
