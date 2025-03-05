@@ -105,46 +105,7 @@ function initializePagination() {
     }
 }
 
-// Add initializePagination to the initialization code
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // Show loading initially
-        showLoading();
-        
-        // Check URL parameters for force refresh
-        const urlParams = new URLSearchParams(window.location.search);
-        const forceRefresh = urlParams.has('forceRefresh');
-
-        // Clear cache if force refresh is requested
-        if (forceRefresh) {
-            localStorage.removeItem('airtableCache');
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, newUrl);
-        }
-
-        // Fetch fresh data
-        records = await fetchAirtableData(forceRefresh);
-        filteredRecords = [...records]; // Initialize filtered records
-        
-        // Initialize all components
-        initializeAreaFilter();
-        setupSearch();
-        initializePagination();
-        
-        // Render the initial records
-        renderRecords();
-        
-        // Hide loading after everything is initialized
-        hideLoading();
-    } catch (error) {
-        console.error('Error initializing app:', error);
-        const tbody = document.querySelector('#dataTable tbody');
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="20" class="text-center text-danger">Failed to load records</td></tr>';
-        }
-        hideLoading();
-    }
-});
+// REMOVED: The duplicate DOMContentLoaded event listener to fix pagination issue
 
 async function initializeApp() {
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -164,15 +125,13 @@ async function initializeApp() {
         records = await fetchAirtableData(forceRefresh);
         filteredRecords = [...records]; // Initialize filtered records
         
-        // Initialize pagination
+        // Initialize all components (centralized)
         initializePagination();
+        setupSearch();
+        initializeAreaFilter();
         
         // Render the records
         renderRecords();
-        
-        // Initialize other components
-        setupSearch();
-        initializeAreaFilter();
 
         // Clean up URL parameters without refreshing the page
         if (forceRefresh) {
@@ -632,7 +591,19 @@ function initializeAreaFilter() {
     areaFilter.addEventListener('change', () => {
         showLoading(); // Show loading when filter changes
         setTimeout(() => {
+            // Apply area filter
+            const selectedArea = areaFilter.value;
+            if (selectedArea) {
+                filteredRecords = filterByPostalDistrict(records, selectedArea);
+            } else {
+                filteredRecords = [...records];
+            }
+            
+            // Reset to first page when changing filter
+            currentPage = 1;
+            
             renderRecords();
+            hideLoading();
         }, 100); // Small delay to ensure loading bar appears
     });
 }

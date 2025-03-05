@@ -51,8 +51,13 @@ async function loadLeads() {
             return;
         }
 
+        // Render the records first
         renderRecords();
+        
+        // Then initialize components ONCE
+        // This is the key fix - only initialize pagination once
         initializePagination();
+        setupSearch();
 
     } catch (error) {
         console.error('Error loading leads:', error);
@@ -117,7 +122,12 @@ function initializePagination() {
     const recordsPerPageSelect = document.getElementById('recordsPerPage');
 
     if (prevButton) {
-        prevButton.addEventListener('click', () => {
+        // Remove existing listeners by cloning and replacing the button
+        const newPrevButton = prevButton.cloneNode(true);
+        prevButton.parentNode.replaceChild(newPrevButton, prevButton);
+        
+        // Add the event listener to the new button
+        newPrevButton.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
                 renderRecords();
@@ -126,7 +136,12 @@ function initializePagination() {
     }
 
     if (nextButton) {
-        nextButton.addEventListener('click', () => {
+        // Remove existing listeners by cloning and replacing the button
+        const newNextButton = nextButton.cloneNode(true);
+        nextButton.parentNode.replaceChild(newNextButton, nextButton);
+        
+        // Add the event listener to the new button
+        newNextButton.addEventListener('click', () => {
             const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
             if (currentPage < totalPages) {
                 currentPage++;
@@ -136,7 +151,12 @@ function initializePagination() {
     }
 
     if (recordsPerPageSelect) {
-        recordsPerPageSelect.addEventListener('change', (e) => {
+        // Remove existing listeners by cloning and replacing the select
+        const newRecordsPerPageSelect = recordsPerPageSelect.cloneNode(true);
+        recordsPerPageSelect.parentNode.replaceChild(newRecordsPerPageSelect, recordsPerPageSelect);
+        
+        // Add the event listener to the new select
+        newRecordsPerPageSelect.addEventListener('change', (e) => {
             recordsPerPage = parseInt(e.target.value);
             currentPage = 1; // Reset to first page when changing records per page
             renderRecords();
@@ -147,8 +167,12 @@ function initializePagination() {
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
+        // Clear existing listeners
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        
         let debounceTimer;
-        searchInput.addEventListener('input', (e) => {
+        newSearchInput.addEventListener('input', (e) => {
             showLoading();
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -320,10 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Make edit function globally available
     window.editLead = editLead;
 
-    // Load leads
+    // Load leads - this will call other initialization functions in the correct order
     loadLeads();
     
-    // Initialize search functionality
-    setupSearch();
+    // REMOVED: setupSearch(); - now called from loadLeads to avoid duplicate initializations
 });
-
