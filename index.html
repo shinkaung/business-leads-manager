@@ -113,11 +113,14 @@
 
     <!-- Main Content -->
     <div class="container-fluid content-wrapper">
-        <!-- Search and Add Record Row -->
+        <!-- Action Bar -->
         <div class="action-bar">
             <div class="search-container">
                 <i class="bi bi-search"></i>
                 <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+                <button class="clear-search btn btn-link" type="button">
+                    <i class="bi bi-x-circle"></i>
+                </button>
             </div>
             
             <div class="sorting-container">
@@ -140,6 +143,29 @@
                     <i class="bi bi-table"></i>
                     <span>Total Records: <strong>27</strong></span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container d-flex justify-content-between align-items-center my-3">
+            <div class="d-flex align-items-center">
+                <span class="me-2">Records per page:</span>
+                <select id="recordsPerPage" class="form-select form-select-sm" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="pagination-buttons">
+                <button id="prevPage" class="btn btn-outline-primary">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo" class="mx-3">
+                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </span>
+                <button id="nextPage" class="btn btn-outline-primary">
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
 

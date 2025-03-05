@@ -21,6 +21,12 @@ function setupFormSubmission() {
             if (value) record[key] = value;
         });
 
+        // Validate assigned region is selected
+        if (!record['assigned_to']) {
+            alert('Please select an assigned region');
+            return;
+        }
+
         // Set default status if not provided
         if (!record['Status']) {
             record['Status'] = VALID_STATUSES[0];

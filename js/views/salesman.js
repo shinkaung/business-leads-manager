@@ -1,5 +1,11 @@
 import { fetchAirtableData } from '../shared/airtable.js';
 
+// Global variables
+let records = [];
+let currentPage = 1;
+let recordsPerPage = 10;
+let filteredRecords = [];
+
 const leadsList = document.querySelector('.leads-list');
 const tableBody = document.querySelector('.table tbody');
 
@@ -40,32 +46,23 @@ async function loadLeads() {
             return;
         }
 
-        const leads = await fetchAirtableData(forceRefresh);
+        records = await fetchAirtableData(forceRefresh);
         
         // Filter leads based on exact match with assigned_to field
-        const filteredLeads = leads.filter(lead => {
+        filteredRecords = records.filter(lead => {
             const leadRegion = lead.fields.assigned_to;
             return leadRegion === userRegion;  // Exact match comparison
         });
 
-        if (!filteredLeads || filteredLeads.length === 0) {
+        if (!filteredRecords || filteredRecords.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="20">No leads found for your region</td></tr>';
             leadsList.innerHTML = '<div class="no-leads">No leads found for your region</div>';
             hideLoading();
             return;
         }
 
-        tableBody.innerHTML = '';
-        leadsList.innerHTML = '';
-
-        filteredLeads.forEach(lead => {
-            tableBody.innerHTML += createTableRow(lead);
-            const card = createLeadCard(lead);
-            leadsList.appendChild(card);
-        });
-
-        updateRecordCount(filteredLeads.length);
-        setupSearch();
+        renderRecords();
+        initializePagination();
 
     } catch (error) {
         console.error('Error loading leads:', error);
@@ -73,6 +70,116 @@ async function loadLeads() {
         leadsList.innerHTML = '<div class="error">Failed to load leads</div>';
     } finally {
         hideLoading();
+    }
+}
+
+function renderRecords() {
+    // Calculate pagination
+    const totalRecords = filteredRecords.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    
+    // Ensure current page is valid
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+    const paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+
+    // Update pagination UI
+    updatePaginationUI(currentPage, totalPages);
+
+    // Clear existing content
+    tableBody.innerHTML = '';
+    leadsList.innerHTML = '';
+
+    // Render paginated records
+    paginatedRecords.forEach(lead => {
+        tableBody.innerHTML += createTableRow(lead);
+        const card = createLeadCard(lead);
+        leadsList.appendChild(card);
+    });
+
+    updateRecordCount(totalRecords);
+}
+
+function updatePaginationUI(currentPage, totalPages) {
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+
+    // Update button states
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    
+    if (prevButton) {
+        prevButton.disabled = currentPage <= 1;
+    }
+    if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages;
+    }
+}
+
+function initializePagination() {
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    const recordsPerPageSelect = document.getElementById('recordsPerPage');
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords();
+            }
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderRecords();
+            }
+        });
+    }
+
+    if (recordsPerPageSelect) {
+        recordsPerPageSelect.addEventListener('change', (e) => {
+            recordsPerPage = parseInt(e.target.value);
+            currentPage = 1; // Reset to first page when changing records per page
+            renderRecords();
+        });
+    }
+}
+
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', (e) => {
+            showLoading();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase();
+                // Update filteredRecords based on search and user region
+                filteredRecords = records.filter(record => {
+                    const leadRegion = record.fields.assigned_to;
+                    const userRegion = JSON.parse(localStorage.getItem('user'))?.region;
+                    
+                    return leadRegion === userRegion && (
+                        record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
+                        record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
+                        record.fields['Address']?.toLowerCase().includes(searchTerm)
+                    );
+                });
+                
+                currentPage = 1; // Reset to first page when searching
+                renderRecords(); // This will use the updated filteredRecords
+                hideLoading();
+            }, 300);
+        });
     }
 }
 
@@ -188,41 +295,6 @@ function createLeadCard(lead) {
     return div;
 }
 
-function setupSearch() {
-    const searchInput = document.querySelector('#searchInput');
-    if (!searchInput) return;
-
-    let debounceTimer;
-    searchInput.addEventListener('input', (e) => {
-        showLoading(); // Show loading when search starts
-        clearTimeout(debounceTimer);
-        
-        debounceTimer = setTimeout(() => {
-            const searchTerm = e.target.value.toLowerCase();
-            const tableRows = document.querySelectorAll('.table tbody tr');
-            const mobileCards = document.querySelectorAll('.lead-card');
-
-            // Filter table rows
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-
-            // Filter mobile cards
-            mobileCards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-
-            // Update visible record count
-            const visibleRows = document.querySelectorAll('.table tbody tr:not([style*="display: none"])').length;
-            updateRecordCount(visibleRows);
-            
-            hideLoading(); // Hide loading after search completes
-        }, 300);
-    });
-}
-
 // Add these helper functions
 function getStatusClass(status) {
     const normalizedStatus = (status || '').toLowerCase().trim();
@@ -281,4 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadLeads();
+    
+    // Initialize search functionality
+    setupSearch();
 }); 

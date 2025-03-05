@@ -2,43 +2,149 @@ import { fetchAirtableData, deleteAirtableRecord } from './shared/airtable.js';
 
 // Global variables
 let records = [];
+let currentPage = 1;
+let recordsPerPage = 10;
+let filteredRecords = [];
 
 // Function declarations that will be exported
-export function renderRecords(records) {
-    showLoading(); // Show loading bar before starting render
+export function renderRecords() {
+    const tbody = document.querySelector('#dataTable tbody');
+    const mobileCards = document.querySelector('.mobile-cards');
     
-    try {
-        const tbody = document.querySelector('#dataTable tbody');
-        const mobileCards = document.querySelector('.mobile-cards');
-        
-        // Clear existing content
-        tbody.innerHTML = '';
-        mobileCards.innerHTML = '';
-        
-        // Apply area filter if selected
-        const areaFilter = document.getElementById('areaFilter');
-        if (areaFilter && areaFilter.value) {
-            records = filterByPostalDistrict(records, areaFilter.value);
-        }
-        
-        records.forEach(record => {
-            // Render table row
-            tbody.innerHTML += createTableRow(record);
-            
-            // Render mobile card
-            mobileCards.innerHTML += createMobileCard(record);
-        });
+    if (!tbody || !mobileCards) {
+        console.error('Required containers not found');
+        return;
+    }
 
-        // Setup mobile card listeners after rendering
-        setupMobileCardListeners();
-        
-        // Update record count
-        updateRecordCount(records.length);
-    } finally {
-        // Hide loading bar after everything is done
-        setTimeout(() => hideLoading(), 300); // Add small delay to ensure UI updates are visible
+    // Calculate pagination
+    const totalRecords = filteredRecords.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    
+    // Ensure current page is valid
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+    const paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+
+    // Update pagination UI
+    updatePaginationUI(currentPage, totalPages);
+
+    // Clear existing content
+    tbody.innerHTML = '';
+    mobileCards.innerHTML = '';
+
+    if (paginatedRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="20" class="text-center">No records found</td></tr>';
+        return;
+    }
+
+    // Render paginated records
+    paginatedRecords.forEach(record => {
+        tbody.innerHTML += createTableRow(record);
+        mobileCards.innerHTML += createMobileCard(record);
+    });
+
+    // Update total records count
+    updateRecordCount(totalRecords);
+    
+    // Setup mobile card listeners
+    setupMobileCardListeners();
+}
+
+function updatePaginationUI(currentPage, totalPages) {
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+
+    // Update button states
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    
+    if (prevButton) {
+        prevButton.disabled = currentPage <= 1;
+    }
+    if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages;
     }
 }
+
+// Initialize pagination controls
+function initializePagination() {
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    const recordsPerPageSelect = document.getElementById('recordsPerPage');
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords();
+            }
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderRecords();
+            }
+        });
+    }
+
+    if (recordsPerPageSelect) {
+        recordsPerPageSelect.addEventListener('change', (e) => {
+            recordsPerPage = parseInt(e.target.value);
+            currentPage = 1; // Reset to first page when changing records per page
+            renderRecords();
+        });
+    }
+}
+
+// Add initializePagination to the initialization code
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Show loading initially
+        showLoading();
+        
+        // Check URL parameters for force refresh
+        const urlParams = new URLSearchParams(window.location.search);
+        const forceRefresh = urlParams.has('forceRefresh');
+
+        // Clear cache if force refresh is requested
+        if (forceRefresh) {
+            localStorage.removeItem('airtableCache');
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
+        // Fetch fresh data
+        records = await fetchAirtableData(forceRefresh);
+        filteredRecords = [...records]; // Initialize filtered records
+        
+        // Initialize all components
+        initializeAreaFilter();
+        setupSearch();
+        initializePagination();
+        
+        // Render the initial records
+        renderRecords();
+        
+        // Hide loading after everything is initialized
+        hideLoading();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        const tbody = document.querySelector('#dataTable tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="20" class="text-center text-danger">Failed to load records</td></tr>';
+        }
+        hideLoading();
+    }
+});
 
 async function initializeApp() {
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -56,12 +162,13 @@ async function initializeApp() {
 
         // Fetch fresh data
         records = await fetchAirtableData(forceRefresh);
+        filteredRecords = [...records]; // Initialize filtered records
+        
+        // Initialize pagination
+        initializePagination();
         
         // Render the records
-        renderRecords(records);
-        
-        // Update total records count
-        updateRecordCount(records.length);
+        renderRecords();
         
         // Initialize other components
         setupSearch();
@@ -238,16 +345,60 @@ function setupSearch() {
             showLoading(); // Show loading when search starts
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredRecords = records.filter(record => 
-                    record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
-                    record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
-                    record.fields['Address']?.toLowerCase().includes(searchTerm)
-                );
-                renderRecords(filteredRecords);
-                updateRecordCount(filteredRecords.length);
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // First filter by search term
+                filteredRecords = records.filter(record => {
+                    const fields = [
+                        'Contact Person',
+                        'Name of outlet',
+                        'Address',
+                        'Tel',
+                        'Email',
+                        'Postal Code'
+                    ];
+                    
+                    return fields.some(field => {
+                        const value = record.fields[field];
+                        return value && value.toString().toLowerCase().includes(searchTerm);
+                    });
+                });
+
+                // Then apply area filter if selected
+                const areaFilter = document.getElementById('areaFilter');
+                if (areaFilter && areaFilter.value) {
+                    filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
+                }
+
+                // Reset to first page
+                currentPage = 1;
+                
+                // Render the filtered results
+                renderRecords();
+                hideLoading();
             }, 300);
         });
+
+        // Add a clear search function
+        const clearSearch = () => {
+            searchInput.value = '';
+            filteredRecords = [...records];
+            
+            // Apply area filter if selected
+            const areaFilter = document.getElementById('areaFilter');
+            if (areaFilter && areaFilter.value) {
+                filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
+            }
+            
+            currentPage = 1;
+            renderRecords();
+        };
+
+        // Add clear button functionality if it exists
+        const clearButton = document.querySelector('.search-container .clear-search');
+        if (clearButton) {
+            clearButton.addEventListener('click', clearSearch);
+        }
     }
 }
 
@@ -276,15 +427,19 @@ async function deleteRecord(id) {
     showLoading(); // Show loading before delete operation
     try {
         await deleteAirtableRecord(id);
-        // Remove from local records array
-        records = records.filter(r => r.id !== id);
         
-        // Clear search input and re-render all records
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.value = '';
+        // Remove from both records and filteredRecords arrays
+        records = records.filter(r => r.id !== id);
+        filteredRecords = filteredRecords.filter(r => r.id !== id);
+        
+        // Ensure current page is valid after deletion
+        const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+        if (currentPage > totalPages) {
+            currentPage = totalPages || 1;
         }
-        renderRecords(records);
+        
+        // Render the updated records
+        renderRecords();
         
         alert('Record deleted successfully');
     } catch (error) {
@@ -477,7 +632,7 @@ function initializeAreaFilter() {
     areaFilter.addEventListener('change', () => {
         showLoading(); // Show loading when filter changes
         setTimeout(() => {
-            renderRecords(records);
+            renderRecords();
         }, 100); // Small delay to ensure loading bar appears
     });
 }

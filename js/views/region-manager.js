@@ -1,5 +1,11 @@
 import { fetchAirtableData } from '../shared/airtable.js';
 
+// Global variables
+let records = [];
+let currentPage = 1;
+let recordsPerPage = 10;
+let filteredRecords = [];
+
 const leadsList = document.querySelector('.leads-list');
 const tableBody = document.querySelector('.table tbody');
 
@@ -36,24 +42,17 @@ async function loadLeads() {
             window.history.replaceState({}, document.title, newUrl);
         }
 
-        const leads = await fetchAirtableData(forceRefresh);
-        if (!leads || leads.length === 0) {
+        records = await fetchAirtableData(forceRefresh);
+        filteredRecords = [...records];
+        
+        if (!records || records.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="20">No leads found</td></tr>';
             leadsList.innerHTML = '<div class="no-leads">No leads found</div>';
             return;
         }
 
-        tableBody.innerHTML = '';
-        leadsList.innerHTML = '';
-
-        leads.forEach(lead => {
-            tableBody.innerHTML += createTableRow(lead);
-            const card = createLeadCard(lead);
-            leadsList.appendChild(card);
-        });
-
-        updateRecordCount(leads.length);
-        setupSearch();
+        renderRecords();
+        initializePagination();
 
     } catch (error) {
         console.error('Error loading leads:', error);
@@ -61,6 +60,110 @@ async function loadLeads() {
         leadsList.innerHTML = '<div class="error">Failed to load leads</div>';
     } finally {
         setTimeout(() => hideLoading(), 300);
+    }
+}
+
+function renderRecords() {
+    // Calculate pagination
+    const totalRecords = filteredRecords.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    
+    // Ensure current page is valid
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+    const paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+
+    // Update pagination UI
+    updatePaginationUI(currentPage, totalPages);
+
+    // Clear existing content
+    tableBody.innerHTML = '';
+    leadsList.innerHTML = '';
+
+    // Render paginated records
+    paginatedRecords.forEach(lead => {
+        tableBody.innerHTML += createTableRow(lead);
+        const card = createLeadCard(lead);
+        leadsList.appendChild(card);
+    });
+
+    updateRecordCount(totalRecords);
+}
+
+function updatePaginationUI(currentPage, totalPages) {
+    // Update page info
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+
+    // Update button states
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    
+    if (prevButton) {
+        prevButton.disabled = currentPage <= 1;
+    }
+    if (nextButton) {
+        nextButton.disabled = currentPage >= totalPages;
+    }
+}
+
+function initializePagination() {
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    const recordsPerPageSelect = document.getElementById('recordsPerPage');
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords();
+            }
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderRecords();
+            }
+        });
+    }
+
+    if (recordsPerPageSelect) {
+        recordsPerPageSelect.addEventListener('change', (e) => {
+            recordsPerPage = parseInt(e.target.value);
+            currentPage = 1; // Reset to first page when changing records per page
+            renderRecords();
+        });
+    }
+}
+
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', (e) => {
+            showLoading();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase();
+                // Update filteredRecords based on search
+                filteredRecords = records.filter(record => 
+                    record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
+                    record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
+                    record.fields['Address']?.toLowerCase().includes(searchTerm)
+                );
+                currentPage = 1; // Reset to first page when searching
+                renderRecords(); // This will use the updated filteredRecords
+                hideLoading();
+            }, 300);
+        });
     }
 }
 
@@ -194,29 +297,6 @@ function getStatusBadgeClass(status) {
     }
 }
 
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = tableBody.getElementsByTagName('tr');
-        const cards = leadsList.getElementsByClassName('lead-card');
-
-        // Search in table view
-        Array.from(rows).forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-
-        // Search in mobile view
-        Array.from(cards).forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-    });
-}
-
 // Check authentication and role on load
 document.addEventListener('DOMContentLoaded', () => {
     const userData = localStorage.getItem('user');
@@ -242,5 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load leads
     loadLeads();
+    
+    // Initialize search functionality
+    setupSearch();
 });
 

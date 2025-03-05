@@ -21,6 +21,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Soju Products': 'sojuProductsList'
     };
 
+    // Set the assigned region field
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const assignedToField = document.getElementById('assigned_to');
+    if (assignedToField && userData.region) {
+        assignedToField.value = userData.region;
+    }
+
     await initializeAutocomplete();
 
     Object.entries(autocompleteFields).forEach(([fieldId, listId]) => {

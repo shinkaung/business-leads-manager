@@ -71,6 +71,29 @@
             </div>
         </div>
 
+        <!-- Pagination Controls -->
+        <div class="pagination-container d-flex justify-content-between align-items-center my-3">
+            <div class="d-flex align-items-center">
+                <span class="me-2">Records per page:</span>
+                <select id="recordsPerPage" class="form-select form-select-sm" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="pagination-buttons">
+                <button id="prevPage" class="btn btn-outline-primary">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo" class="mx-3">
+                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </span>
+                <button id="nextPage" class="btn btn-outline-primary">
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- Database Section -->
         <div id="database-section" class="content-section active">
             <!-- Table view for desktop -->

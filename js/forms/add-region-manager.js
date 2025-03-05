@@ -70,6 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Set the assigned region field
+    const assignedToField = document.getElementById('assigned_to');
+    if (assignedToField && user.region) {
+        assignedToField.value = user.region;
+        assignedToField.disabled = true; // Disable the select since region manager should only add to their region
+    }
+
     initializeAutocomplete();
     setupFormSubmission();
 });

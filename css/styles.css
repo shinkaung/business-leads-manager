@@ -338,21 +338,37 @@ body {
 /* Search input styling */
 .search-container {
     position: relative;
-    flex: 1;
-    max-width: 400px;
+    display: flex;
+    align-items: center;
+    max-width: 300px;
 }
 
-.search-container i {
+.search-container i.bi-search {
     position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 10px;
     color: #6c757d;
 }
 
 .search-container input {
     padding-left: 35px;
-    border-radius: 6px;
+    padding-right: 35px;
+}
+
+.search-container .clear-search {
+    position: absolute;
+    right: 5px;
+    padding: 0;
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container .clear-search:hover {
+    color: #dc3545;
 }
 
 /* Action buttons container */
@@ -1169,4 +1185,48 @@ button[onclick*="deleteRecord"] i,
 .table td .btn-group .btn {
     height: 32px !important;
     line-height: 1 !important;
+}
+
+.pagination-container {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-buttons button {
+    min-width: 100px;
+}
+
+.pagination-buttons button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+#recordsPerPage {
+    min-width: 80px;
+}
+
+/* Responsive styles for pagination */
+@media (max-width: 768px) {
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .pagination-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #recordsPerPage {
+        width: 80px;
+    }
 }
