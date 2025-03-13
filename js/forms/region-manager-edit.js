@@ -63,10 +63,55 @@ async function loadRecord() {
         const form = document.getElementById('editRecordForm');
         if (!form) return;
 
-        Object.entries(record.fields).forEach(([key, value]) => {
-            const element = form.querySelector(`[name="${key}"]`);
+        // Define all fields that should be populated
+        const fields = [
+            'Contact Person',
+            'Position',
+            'Tel',
+            'Email',
+            'Name of outlet',
+            'Address',
+            'Postal Code',
+            'Category',
+            'Style/Type of Cuisine',
+            'Size of Establishment',
+            'Products on Tap',
+            'Estimated Monthly Consumption (HL)',
+            'Beer Bottle Products',
+            'Estimated Monthly Consumption (Cartons)',
+            'Soju Products',
+            'Rating',
+            'Last Visit Date',
+            'Next Visit Date',
+            'Closing Probability',
+            'Proposed Products & HL Target',
+            'Follow Up Actions',
+            'Remarks',
+            'Status'
+        ];
+
+        // Populate each field
+        fields.forEach(fieldName => {
+            const element = form.querySelector(`[name="${fieldName}"]`);
             if (element) {
-                element.value = value || '';
+                let value = record.fields[fieldName] || '';
+                
+                // Special handling for Closing Probability
+                if (fieldName === 'Closing Probability' && value) {
+                    // Convert percentage value to decimal for Airtable (40 -> 0.4)
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                        value = numValue / 100;
+                    }
+                }
+                
+                if (element.tagName.toLowerCase() === 'select') {
+                    setTimeout(() => {
+                        element.value = value;
+                    }, 0);
+                } else {
+                    element.value = value;
+                }
             }
         });
 
@@ -88,7 +133,19 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
     const record = {};
     
     formData.forEach((value, key) => {
-        if (value) record[key] = value;
+        if (value) {
+            // Special handling for Closing Probability
+            if (key === 'Closing Probability') {
+                // Convert to number and validate
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                    // Store the number as is
+                    record[key] = numValue / 100; // Convert percentage to decimal for Airtable
+                }
+            } else {
+                record[key] = value;
+            }
+        }
     });
 
     try {

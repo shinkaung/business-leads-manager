@@ -79,6 +79,46 @@
                     <textarea class="form-control" name="Remarks" id="Remarks" rows="3"></textarea>
                 </div>
 
+                <!-- New Fields -->
+                <div class="col-md-6">
+                    <label for="Rating" class="form-label">Rating</label>
+                    <select class="form-control" name="Rating" id="Rating">
+                        <option value="">Select Rating</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Bronze">Bronze</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Last Visit Date" class="form-label">Last Visit Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           name="Last Visit Date" 
+                           id="Last Visit Date"
+                           onchange="formatDate(this)">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Next Visit Date" class="form-label">Next Visit Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           name="Next Visit Date" 
+                           id="Next Visit Date"
+                           onchange="formatDate(this)">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Closing Probability" class="form-label">Closing Probability (%)</label>
+                    <input type="number" 
+                           class="form-control" 
+                           name="Closing Probability" 
+                           id="Closing Probability"
+                           min="0"
+                           max="100"
+                           step="1">
+                </div>
+
                 <!-- Status -->
                 <div class="col-md-6">
                     <label for="Status" class="form-label">Status</label>
@@ -101,11 +141,43 @@
         function goBack() {
             const urlParams = new URLSearchParams(window.location.search);
             const returnTo = urlParams.get('returnTo') || 'index';
-            window.location.href = returnTo === 'salesman' ? './salesman.html' : '../index.html';
+            if (returnTo === 'visits') {
+                window.location.href = './visits.html';
+            } else if (returnTo === 'salesman') {
+                window.location.href = './salesman.html';
+            } else {
+                window.location.href = '../index.html';
+            }
         }
     </script>
     <script type="module" src="../js/shared/airtable.js"></script>
     <script type="module" src="../js/shared/autocomplete.js"></script>
     <script type="module" src="../js/forms/edit.js"></script>
+    <script>
+        function formatDate(input) {
+            if (input.value) {
+                const date = new Date(input.value);
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                input.dataset.formattedValue = `${day}/${month}/${year}`;
+            }
+        }
+
+        // Convert DD/MM/YYYY to YYYY-MM-DD for date input
+        function convertDateFormat() {
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                const value = input.value;
+                if (value && value.includes('/')) {
+                    const [day, month, year] = value.split('/');
+                    input.value = `${year}-${month}-${day}`;
+                }
+            });
+        }
+
+        // Call this after form is populated
+        document.addEventListener('DOMContentLoaded', convertDateFormat);
+    </script>
 </body>
 </html> 

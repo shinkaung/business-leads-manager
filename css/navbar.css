@@ -1,0 +1,45 @@
+/* Navbar styling */
+.navbar {
+    background-color: var(--east-bay) !important;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    color: white !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.navbar .nav-link:hover {
+    color: white !important;
+}
+
+.navbar .nav-link.active {
+    color: white !important;
+    font-weight: 600;
+}
+
+#userDisplay {
+    color: white;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Make the navbar toggler white for mobile */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Update outline button for navbar */
+.btn-outline-light:hover {
+    background-color: var(--port-gore);
+} 

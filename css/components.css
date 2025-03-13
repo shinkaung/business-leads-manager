@@ -1,0 +1,571 @@
+/* Loading Bar Styles */
+.loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.loading-container .progress {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container .progress-bar {
+    background-color: var(--east-bay);
+}
+
+.loading-container .text-center {
+    color: #6c757d;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Sorting Container Styles */
+.sorting-container {
+    position: relative;
+    min-width: 200px;
+    max-width: 250px;
+    flex-shrink: 1;
+    margin: 0 auto;  /* Center the sorting container */
+}
+
+.sorting-container select {
+    width: 100%;
+    padding: 8px 35px 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    transition: all 0.2s ease;
+}
+
+.sorting-container select:focus {
+    border-color: var(--east-bay);
+    box-shadow: 0 0 0 0.2rem rgba(67, 90, 141, 0.25);
+    outline: none;
+}
+
+/* Dropdown menu styles */
+.dropdown-menu {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    min-width: 200px;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(67, 90, 141, 0.1);
+    color: var(--east-bay);
+}
+
+.dropdown-item.active {
+    background-color: var(--east-bay);
+    color: white;
+}
+
+/* Pagination styles */
+.pagination-container {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-buttons button {
+    min-width: 100px;
+}
+
+.pagination-buttons button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Search and action bar styling */
+.action-bar {
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Search container */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 250px;
+    max-width: 300px;
+    flex-shrink: 1;
+}
+
+.search-container i.bi-search {
+    position: absolute;
+    left: 10px;
+    color: #6c757d;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 8px 35px 8px 35px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.search-container .clear-search {
+    position: absolute;
+    right: 5px;
+    padding: 0;
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container .clear-search:hover {
+    color: #dc3545;
+}
+
+/* Action buttons container */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Add New Record button styling */
+.btn-add-record {
+    background-color: var(--fruit-salad);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-add-record:hover {
+    background-color: #3d8053;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.records-counter {
+    background-color: var(--east-bay);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.records-counter i {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .action-bar {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .search-container {
+        flex: 1 1 250px;
+    }
+
+    .sorting-container {
+        flex: 1 1 200px;
+        margin: 0; /* Remove center alignment on tablet */
+    }
+
+    .action-buttons {
+        flex: 0 0 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .action-bar {
+        padding: 12px;
+    }
+
+    .search-container,
+    .sorting-container {
+        flex: 0 0 100%;
+    }
+
+    .sorting-container select {
+        padding: 12px 40px 12px 16px; /* Larger padding for mobile */
+        font-size: 16px; /* Larger font size for mobile */
+        background-position: right 1rem center; /* Adjust arrow position */
+    }
+
+    /* Mobile dropdown styles */
+    .dropdown-menu {
+        width: 100%;
+        max-height: 80vh;
+        border-radius: 12px;
+        padding: 12px 0;
+        margin-top: 8px;
+    }
+
+    .dropdown-item {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-add-record,
+    .records-counter {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Sort button styles */
+.sort-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 16px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+    border-color: var(--east-bay);
+    background-color: rgba(67, 90, 141, 0.05);
+}
+
+.sort-btn i {
+    margin-left: 8px;
+    font-size: 1.1em;
+    opacity: 0.7;
+}
+
+/* Mobile sort button */
+@media (max-width: 576px) {
+    .sort-btn {
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+
+    .sort-btn i {
+        font-size: 1.2em;
+    }
+
+    /* Overlay background for mobile dropdown */
+    .dropdown-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
+
+    /* Mobile dropdown animation */
+    .dropdown-menu {
+        transform-origin: top center;
+        animation: dropdownFadeIn 0.2s ease-out;
+    }
+
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Reminder Section Styles */
+.reminder-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+    padding: 15px;
+}
+
+.reminder-section .d-flex.gap-4 {
+    flex-wrap: wrap;
+}
+
+.reminder-section .flex-grow-1 {
+    min-width: 300px;
+    flex: 1;
+}
+
+.reminder-header {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.reminder-header h5 {
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reminder-header h5 i {
+    font-size: 1.1em;
+}
+
+.reminder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reminder-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.reminder-item:hover {
+    background: #f0f0f0;
+}
+
+.reminder-item.today {
+    border-left: 4px solid #ffc107;
+}
+
+.reminder-item.upcoming {
+    border-left: 4px solid #0dcaf0;
+}
+
+.reminder-item.overdue {
+    border-left: 4px solid #dc3545;
+}
+
+.reminder-item strong {
+    flex: 1;
+    color: #333;
+}
+
+.reminder-item span:not(.badge) {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.reminder-item .badge {
+    padding: 6px 10px;
+    font-weight: normal;
+}
+
+.reminder-item button {
+    padding: 4px 8px;
+    font-size: 0.85em;
+}
+
+.reminder-item button i {
+    margin-right: 0;
+}
+
+/* Empty State Style */
+.reminder-list .text-muted {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .reminder-section .d-flex.gap-4 {
+        flex-direction: column;
+    }
+
+    .reminder-section .flex-grow-1 {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .reminder-section .flex-grow-1:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Sort dropdown styles */
+.sort-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.sort-toggle {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-toggle:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+.sort-toggle i {
+    color: #495057;
+    font-size: 14px;
+}
+
+.sort-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 160px;
+    margin-top: 4px;
+}
+
+.sort-dropdown.active .sort-menu {
+    display: block;
+}
+
+.sort-option {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.sort-option:hover {
+    background-color: #f8f9fa;
+    color: var(--east-bay);
+}
+
+.sort-option i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+/* Make sort buttons more visible in table headers */
+th {
+    position: relative;
+    padding-right: 40px !important; /* Make room for sort button */
+}
+
+th .sort-dropdown {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Responsive adjustments for sort buttons */
+@media (max-width: 768px) {
+    .sort-toggle {
+        padding: 6px 10px; /* Slightly larger touch target on mobile */
+    }
+
+    .sort-toggle i {
+        font-size: 16px; /* Larger icon on mobile */
+    }
+
+    .sort-menu {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: auto;
+        bottom: 20px;
+        width: 90%;
+        max-width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .sort-option {
+        padding: 12px 16px; /* Larger touch targets */
+        font-size: 16px;
+    }
+} 

@@ -1,0 +1,739 @@
+/* Main Layout Improvements */
+:root {
+    --primary: #4361ee;
+    --success: #2ec4b6;
+    --danger: #e63946;
+    --warning: #ff9f1c;
+    --info: #4cc9f0;
+    --light-bg: #f8f9fa;
+    --border-color: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    background-color: #f5f7fa;
+  }
+  
+  .container {
+    max-width: 1200px;
+    padding: 1.5rem;
+  }
+  
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .page-header h2 {
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .visits-counter {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  /* Filters Section */
+  .filters-section {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .filters-section .form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  
+  .filters-section .form-select,
+  .filters-section .form-control {
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.75rem;
+    transition: var(--transition);
+  }
+  
+  .filters-section .form-select:focus,
+  .filters-section .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+  }
+  
+  #customDateRange {
+    display: none;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  /* Visits Cards Layout */
+  .visits-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .visit-card {
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: none;
+    position: relative;
+  }
+  
+  .visit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Status Indicators */
+  .visit-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background-color: transparent;
+  }
+  
+  .visit-overdue::before {
+    background-color: var(--danger);
+  }
+  
+  .visit-today::before {
+    background-color: var(--warning);
+  }
+  
+  .visit-upcoming::before {
+    background-color: var(--info);
+  }
+  
+  .visit-scheduled::before {
+    background-color: var(--success);
+  }
+  
+  /* Visit Card Header */
+  .visit-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .visit-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .visit-header .contact-person {
+    margin-top: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 1rem;
+    margin-top: 0.75rem;
+  }
+  
+  .status-badge.overdue {
+    background-color: rgba(230, 57, 70, 0.1);
+    color: var(--danger);
+  }
+  
+  .status-badge.today {
+    background-color: rgba(255, 159, 28, 0.1);
+    color: var(--warning);
+  }
+  
+  .status-badge.upcoming {
+    background-color: rgba(76, 201, 240, 0.1);
+    color: var(--info);
+  }
+  
+  .status-badge.scheduled {
+    background-color: rgba(46, 196, 182, 0.1);
+    color: var(--success);
+  }
+  
+  /* Visit Card Body */
+  .visit-body {
+    padding: 1.25rem;
+  }
+  
+  .visit-info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .visit-info-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .visit-info-row i {
+    width: 20px;
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+  }
+  
+  .visit-info-row.address, 
+  .visit-info-row.phone {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  
+  .visit-info-row.date {
+    font-weight: 500;
+  }
+  
+  .visit-info-row.date.next {
+    color: var(--primary);
+  }
+  
+  .visit-info-row.date.last {
+    color: var(--text-secondary);
+  }
+  
+  /* Visit Card Footer */
+  .visit-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .btn-visit {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: var(--transition);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-visit.success {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+  
+  .btn-visit.success:hover {
+    background-color: #25a898;
+    border-color: #25a898;
+  }
+  
+  .btn-visit.primary {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .btn-visit.primary:hover {
+    background-color: var(--light-bg);
+    border-color: var(--border-color);
+  }
+  
+  /* View Toggler */
+  .view-toggle {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.25rem;
+  }
+  
+  .view-toggle-btn {
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .view-toggle-btn.active {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  /* Visit Completion Modal */
+  .modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  
+  .modal-header {
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem;
+  }
+  
+  .modal-header .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-body .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-body .form-control, 
+  .modal-body .form-select {
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border-color);
+  }
+  
+  .modal-body .form-control:focus, 
+  .modal-body .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .visit-history-section {
+    margin-top: 2rem;
+    background: white;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .visit-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .visit-history-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .history-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  
+  .history-card {
+    background-color: var(--light-bg);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border-left: 4px solid var(--success);
+  }
+  
+  .history-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  
+  .history-business {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .history-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  
+  .history-notes {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+  }
+  
+  .history-outcome {
+    font-size: 0.85rem;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(46, 196, 182, 0.1);
+    color: var(--success);
+    border-radius: 0.25rem;
+  }
+  
+  /* Loading Overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--light-bg);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Empty States */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .empty-state-icon {
+    font-size: 3rem;
+    color: var(--border-color);
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+  
+  .empty-state-message {
+    color: var(--text-secondary);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  /* Small Device Adjustments */
+  @media (max-width: 768px) {
+    .visits-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .view-toggle-btn {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+    }
+    
+    .modal-dialog {
+      margin: 0.5rem;
+    }
+    
+    .history-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .filters-section {
+        margin: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .visits-header {
+        padding: 0 0.5rem;
+    }
+
+    .mobile-card {
+        background: white;
+        border-radius: 0.75rem;
+        margin: 0.75rem;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        border-left: 4px solid transparent;
+    }
+
+    .mobile-card.status-overdue {
+        border-left-color: var(--danger);
+    }
+
+    .mobile-card.status-today {
+        border-left-color: var(--warning);
+    }
+
+    .mobile-card.status-upcoming {
+        border-left-color: var(--info);
+    }
+
+    .mobile-card.status-scheduled {
+        border-left-color: var(--success);
+    }
+
+    .mobile-card-header {
+        margin-bottom: 1rem;
+    }
+
+    .mobile-card-field {
+        display: flex;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-card-field:last-child {
+        border-bottom: none;
+    }
+
+    .mobile-card-label {
+        width: 35%;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mobile-card-value {
+        width: 65%;
+        word-break: break-word;
+    }
+
+    .mobile-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .mobile-card-actions .btn {
+        flex: 1;
+        min-width: calc(33.33% - 0.5rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    /* Adjust filters for mobile */
+    .filters-section .row {
+        margin: 0;
+    }
+
+    .filters-section .col-md-3,
+    .filters-section .col-md-6 {
+        padding: 0.5rem;
+    }
+
+    #customDateRange {
+        margin-top: 0.5rem;
+    }
+
+    /* Hide desktop table on mobile */
+    .desktop-view {
+        display: none;
+    }
+
+    /* Show mobile cards */
+    .mobile-view {
+        display: block;
+    }
+
+    /* Adjust modal for mobile */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-footer {
+        padding: 0.75rem;
+    }
+
+    /* Improve form controls for mobile */
+    .form-select,
+    .form-control {
+        height: 48px; /* Larger touch target */
+        font-size: 16px; /* Better readability */
+        padding: 10px 12px;
+    }
+
+    /* Specifically target dropdowns in mobile cards */
+    .mobile-card .form-select,
+    .mobile-card select.form-control {
+        width: 100%;
+        height: 48px;
+        font-size: 16px;
+        padding: 10px 12px;
+        margin: 4px 0;
+    }
+
+    /* Improve dropdown arrows */
+    .form-select {
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+  }
+
+  /* Desktop view */
+  @media (min-width: 769px) {
+    .mobile-view {
+        display: none;
+    }
+
+    .desktop-view {
+        display: block;
+    }
+  }
+
+  /* Visit Table Styles */
+  .table {
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0;
+  }
+
+  .table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem;
+    white-space: nowrap;
+  }
+
+  .table tbody tr {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  .table td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+
+  /* Status Styles */
+  .visit-row.visit-overdue {
+    border-left-color: #dc3545;
+  }
+
+  .visit-row.visit-today {
+    border-left-color: #ffc107;
+  }
+
+  .visit-row.visit-upcoming {
+    border-left-color: #17a2b8;
+  }
+
+  .visit-row.visit-scheduled {
+    border-left-color: #28a745;
+  }
+
+  /* Badge Styles */
+  .badge {
+    font-weight: 500;
+    font-size: 0.7rem;
+    padding: 0.35em 0.65em;
+    border-radius: 50rem;
+  }
+
+  /* Rating Badge Colors */
+  .rating-gold {
+    background-color: #ffc107;
+    color: #000;
+  }
+
+  .rating-silver {
+    background-color: #adb5bd;
+    color: #fff;
+  }
+
+  .rating-bronze {
+    background-color: #CD7F32;
+    color: #fff;
+  }
+
+  /* Other Badge Colors */
+  .bg-danger {
+    background-color: #dc3545 !important;
+  }
+
+  .bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+
+  .bg-info {
+    background-color: #17a2b8 !important;
+  }
+
+  .bg-success {
+    background-color: #28a745 !important;
+  }
+
+  /* Remove old styles */
+  .rating-text, .rating-dot, .rating-badge, .bg-bronze {
+    display: none;
+  }
+
+  /* Tooltip customization */
+  .tooltip {
+    font-size: 0.875rem;
+  }
+
+  .tooltip .tooltip-inner {
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(0, 0, 0, 0.8);
+  }

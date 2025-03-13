@@ -126,6 +126,45 @@
 
                 <!-- Add this before the Status field -->
                 <div class="col-md-6">
+                    <label for="Rating" class="form-label">Rating</label>
+                    <select class="form-control" name="Rating" id="Rating">
+                        <option value="">Select Rating</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Bronze">Bronze</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Last Visit Date" class="form-label">Last Visit Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           name="Last Visit Date" 
+                           id="Last Visit Date"
+                           onchange="formatDate(this)">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Next Visit Date" class="form-label">Next Visit Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           name="Next Visit Date" 
+                           id="Next Visit Date"
+                           onchange="formatDate(this)">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="Closing Probability" class="form-label">Closing Probability (%)</label>
+                    <input type="number" 
+                           class="form-control" 
+                           name="Closing Probability" 
+                           id="Closing Probability"
+                           min="0"
+                           max="100"
+                           step="1">
+                </div>
+
+                <div class="col-md-6">
                     <label for="assigned_to" class="form-label">Assigned Region</label>
                     <select class="form-control" name="assigned_to" id="assigned_to">
                         <option value="">Select Region</option>
@@ -158,5 +197,16 @@
     <script type="module" src="../js/shared/airtable.js"></script>
     <script type="module" src="../js/forms/add.js"></script>
     <script type="module" src="../js/shared/autocomplete.js"></script>
+    <script>
+        function formatDate(input) {
+            if (input.value) {
+                const date = new Date(input.value);
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                input.dataset.formattedValue = `${day}/${month}/${year}`;
+            }
+        }
+    </script>
 </body>
 </html> 

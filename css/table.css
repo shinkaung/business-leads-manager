@@ -1,0 +1,166 @@
+/* Table styling */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    color: #19193e;
+    font-weight: 600;
+    padding: 12px 8px;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-bottom: 2px solid #435a8d;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(67, 90, 141, 0.05);
+}
+
+/* Make the table scrollable horizontally */
+.table-responsive {
+    max-height: 80vh;
+    overflow-y: auto;
+    margin-top: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 1px;
+}
+
+/* Custom scrollbar */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Zebra striping */
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Row highlight animations */
+.highlight-row {
+    background-color: #d1e7dd !important;
+    transition: background-color 0.5s ease;
+}
+
+.highlight-flash {
+    animation: flashHighlight 2s ease-out;
+}
+
+@keyframes flashHighlight {
+    0% {
+        background-color: #d1e7dd;
+        border-left: 4px solid #198754;
+    }
+    70% {
+        background-color: #d1e7dd;
+        border-left: 4px solid #198754;
+    }
+    100% {
+        background-color: transparent;
+        border-left: 0;
+    }
+}
+
+/* Sort dropdown styling */
+.sort-dropdown {
+    display: inline-block;
+    position: relative;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.sort-toggle {
+    border: none;
+    background: none;
+    padding: 4px;
+    margin: 0;
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.sort-toggle:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.sort-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    min-width: 150px;
+}
+
+.sort-dropdown.active .sort-menu {
+    display: block;
+}
+
+.sort-option {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #212529;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.sort-option:hover {
+    background-color: #f8f9fa;
+    color: #0d6efd;
+}
+
+.sort-option i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+/* Make table headers position relative for sort dropdown */
+.table th {
+    position: relative;
+    white-space: nowrap;
+    padding-right: 35px;
+}
+
+/* Responsive adjustments for sort dropdown */
+@media (max-width: 768px) {
+    .sort-dropdown {
+        display: none;
+    }
+} 

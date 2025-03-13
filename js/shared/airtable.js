@@ -182,6 +182,10 @@ async function updateAirtableRecord(recordId, fields) {
             throw new Error('Failed to update record');
         }
 
+        // Always clear cache after successful update
+        localStorage.removeItem(CACHE_KEY);
+        cachedRecords = null;
+
         return await response.json();
     } catch (error) {
         console.error('Error updating record:', error);

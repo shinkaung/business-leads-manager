@@ -83,6 +83,10 @@ async function loadRecord() {
             'Beer Bottle Products',
             'Estimated Monthly Consumption (Cartons)',
             'Soju Products',
+            'Rating',
+            'Last Visit Date',
+            'Next Visit Date',
+            'Closing Probability',
             'Proposed Products & HL Target',
             'Follow Up Actions',
             'Remarks',
@@ -93,7 +97,17 @@ async function loadRecord() {
         fields.forEach(fieldName => {
             const element = form.querySelector(`[name="${fieldName}"]`);
             if (element) {
-                const value = record.fields[fieldName] || '';
+                let value = record.fields[fieldName] || '';
+                
+                // Special handling for Closing Probability
+                if (fieldName === 'Closing Probability' && value !== undefined) {
+                    // Convert from decimal (0.4) to percentage (40)
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue)) {
+                        value = Math.round(numValue * 100).toString();
+                    }
+                }
+                
                 if (element.tagName.toLowerCase() === 'select') {
                     setTimeout(() => {
                         element.value = value;
@@ -122,7 +136,18 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
     const record = {};
     
     formData.forEach((value, key) => {
-        if (value) record[key] = value;
+        if (value) {
+            // Special handling for Closing Probability
+            if (key === 'Closing Probability') {
+                // Convert percentage value to decimal for Airtable (40 -> 0.4)
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                    record[key] = numValue / 100;
+                }
+            } else {
+                record[key] = value;
+            }
+        }
     });
 
     // Preserve the assigned_to field for salespeople
@@ -149,20 +174,15 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         localStorage.setItem('user', JSON.stringify(userData));
         
         const timestamp = new Date().getTime();
+        const returnTo = urlParams.get('returnTo') || 'index';
         let redirectUrl;
 
-        switch(userRole) {
-            case 'admin':
-                redirectUrl = '../index.html';
-                break;
-            case 'salesman':
-                redirectUrl = './salesman.html';
-                break;
-            case 'region_manager':
-                redirectUrl = './region-manager.html';
-                break;
-            default:
-                redirectUrl = '../pages/login.html';
+        if (returnTo === 'visits') {
+            redirectUrl = './visits.html';
+        } else if (returnTo === 'salesman') {
+            redirectUrl = './salesman.html';
+        } else {
+            redirectUrl = '../index.html';
         }
         
         window.location.href = `${redirectUrl}?forceRefresh=true&t=${timestamp}`;
@@ -188,4 +208,4 @@ function goBack() {
         default:
             window.location.href = './login.html';
     }
-} 
+}

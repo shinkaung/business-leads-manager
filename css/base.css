@@ -1,0 +1,74 @@
+/* Custom color variables */
+:root {
+    --east-bay: #435a8d;
+    --port-gore: #19193e;
+    --fruit-salad: #499662;
+    --brandy-punch: #c7852a;
+    --pomegranate: #f44336;
+    --new-color: #ff4444;
+    --qualified-color: #ff9800;
+    --existing-color: #4caf50;
+    --status-new: #ff4444;
+    --status-qualified: #ff9800;
+    --status-existing: #4caf50;
+}
+
+/* Base styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+/* Utility classes */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Custom button colors */
+.btn-primary {
+    background-color: var(--east-bay);
+    border-color: var(--east-bay);
+}
+
+.btn-primary:hover {
+    background-color: var(--port-gore);
+    border-color: var(--port-gore);
+}
+
+.btn-success {
+    background-color: var(--fruit-salad);
+    border-color: var(--fruit-salad);
+}
+
+.btn-success:hover {
+    background-color: #3d8053;
+    border-color: #3d8053;
+}
+
+.btn-warning {
+    background-color: var(--brandy-punch);
+    border-color: var(--brandy-punch);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #b37725;
+    border-color: #b37725;
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--pomegranate);
+    border-color: var(--pomegranate);
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+} 

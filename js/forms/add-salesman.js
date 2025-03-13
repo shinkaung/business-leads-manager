@@ -1,3 +1,10 @@
+// Constants for visit scheduling
+const VISIT_INTERVALS = {
+    'Gold': 30,   // 1 month
+    'Silver': 45, // 1.5 months
+    'Bronze': 60  // 2 months
+};
+
 import { createAirtableRecord } from '../shared/airtable.js';
 import { initializeAutocomplete } from '../shared/autocomplete.js';
 
@@ -38,6 +45,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     setupFormSubmission();
+
+    // Add event listener for rating change
+    const ratingSelect = document.getElementById('Rating');
+    const nextVisitDateInput = document.getElementById('Next Visit Date');
+    const lastVisitDateInput = document.getElementById('Last Visit Date');
+
+    if (ratingSelect && nextVisitDateInput && lastVisitDateInput) {
+        ratingSelect.addEventListener('change', () => {
+            // Only update next visit date if last visit date is set
+            if (lastVisitDateInput.value) {
+                const rating = ratingSelect.value || 'Bronze';
+                const interval = VISIT_INTERVALS[rating] || 60;
+                
+                const lastVisitDate = new Date(lastVisitDateInput.value);
+                const nextVisitDate = new Date(lastVisitDate);
+                nextVisitDate.setDate(lastVisitDate.getDate() + interval);
+                
+                nextVisitDateInput.value = nextVisitDate.toISOString().split('T')[0];
+            }
+        });
+
+        // Also update next visit date when last visit date changes
+        lastVisitDateInput.addEventListener('change', () => {
+            if (lastVisitDateInput.value) {
+                const rating = ratingSelect.value || 'Bronze';
+                const interval = VISIT_INTERVALS[rating] || 60;
+                
+                const lastVisitDate = new Date(lastVisitDateInput.value);
+                const nextVisitDate = new Date(lastVisitDate);
+                nextVisitDate.setDate(lastVisitDate.getDate() + interval);
+                
+                nextVisitDateInput.value = nextVisitDate.toISOString().split('T')[0];
+            }
+        });
+    }
 });
 
 function setupInputListener(fieldId, listId, input) {
@@ -70,7 +112,12 @@ function setupFormSubmission() {
         const record = {};
         
         formData.forEach((value, key) => {
-            if (value) record[key] = value;
+            if (key === 'Closing Probability') {
+                // Convert the percentage value to decimal (40 becomes 0.4)
+                record[key] = parseInt(value) / 100;
+            } else {
+                record[key] = value;
+            }
         });
 
         // Get user's region and ensure it's set
@@ -86,6 +133,18 @@ function setupFormSubmission() {
         // Set default status for new leads if not specified
         if (!record.Status) {
             record.Status = 'new lead';
+        }
+
+        // If Last Visit Date is set but Next Visit Date is not, calculate Next Visit Date based on rating
+        if (record['Last Visit Date'] && !record['Next Visit Date']) {
+            const rating = record['Rating'] || 'Bronze';
+            const interval = VISIT_INTERVALS[rating] || 60;
+            
+            const lastVisitDate = new Date(record['Last Visit Date']);
+            const nextVisitDate = new Date(lastVisitDate);
+            nextVisitDate.setDate(lastVisitDate.getDate() + interval);
+            
+            record['Next Visit Date'] = nextVisitDate.toISOString().split('T')[0];
         }
 
         try {

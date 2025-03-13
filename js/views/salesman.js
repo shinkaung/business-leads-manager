@@ -98,6 +98,82 @@ function renderRecords() {
     tableBody.innerHTML = '';
     leadsList.innerHTML = '';
 
+    // Get upcoming visits
+    const upcomingVisits = getUpcomingVisits();
+    
+    // Update the reminder section if it exists
+    const reminderSection = document.querySelector('.reminder-section');
+    if (reminderSection) {
+        // Split visits into overdue and upcoming
+        const overdueVisits = upcomingVisits.filter(v => v.visitInfo.status === 'overdue');
+        const upcomingAndTodayVisits = upcomingVisits.filter(v => v.visitInfo.status !== 'overdue');
+
+        reminderSection.innerHTML = `
+            <div class="d-flex gap-4">
+                <!-- Overdue Visits -->
+                <div class="flex-grow-1">
+                    <div class="reminder-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-exclamation-circle text-danger"></i> Overdue Visits</h5>
+                                ${overdueVisits.length > 0 ? `
+                                    <span class="ms-2 badge rounded-pill bg-danger" style="font-size: 0.8rem; position: relative; top: -8px;">
+                                        ${overdueVisits.length}
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reminder-list">
+                        ${overdueVisits.map(({ lead, visitInfo }) => `
+                            <div class="reminder-item ${visitInfo.status}">
+                                <span class="${getVisitBadgeClass(visitInfo.status)}">${visitInfo.message}</span>
+                                <strong>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</strong>
+                                <span>${lead.fields['Contact Person'] || 'No contact'}</span>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="editLead('${lead.id}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                        ${overdueVisits.length === 0 ? '<p class="text-muted">No overdue visits</p>' : ''}
+                    </div>
+                </div>
+
+                <!-- Upcoming Visits -->
+                <div class="flex-grow-1">
+                    <div class="reminder-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-calendar-check text-primary"></i> Upcoming Visits</h5>
+                                ${upcomingAndTodayVisits.length > 0 ? `
+                                    <span class="ms-2 badge rounded-pill bg-primary" style="font-size: 0.8rem; position: relative; top: -8px;">
+                                        ${upcomingAndTodayVisits.length}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <small class="text-muted">Next 7 days</small>
+                        </div>
+                    </div>
+                    <div class="reminder-list">
+                        ${upcomingAndTodayVisits.map(({ lead, visitInfo }) => `
+                            <div class="reminder-item ${visitInfo.status}">
+                                <span class="${getVisitBadgeClass(visitInfo.status)}">${visitInfo.message}</span>
+                                <strong>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</strong>
+                                <span>${lead.fields['Contact Person'] || 'No contact'}</span>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="editLead('${lead.id}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                        ${upcomingAndTodayVisits.length === 0 ? '<p class="text-muted">No upcoming visits this week</p>' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     // Render paginated records
     paginatedRecords.forEach(lead => {
         tableBody.innerHTML += createTableRow(lead);
@@ -175,35 +251,143 @@ function initializePagination() {
 
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    let debounceTimer; // Move debounceTimer outside the if block
+
+    function handleSearch(e) {
+        showLoading();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const searchTerm = e.target.value.toLowerCase();
+            // Update filteredRecords based on search and user region
+            const userRegion = JSON.parse(localStorage.getItem('user'))?.region;
+            
+            filteredRecords = records.filter(record => {
+                const leadRegion = record.fields.assigned_to;
+                
+                if (leadRegion !== userRegion) return false;
+                
+                const contactPerson = record.fields['Contact Person']?.toLowerCase() || '';
+                const businessName = record.fields['Name of outlet']?.toLowerCase() || '';
+                const address = record.fields['Address']?.toLowerCase() || '';
+                
+                return contactPerson.includes(searchTerm) ||
+                       businessName.includes(searchTerm) ||
+                       address.includes(searchTerm);
+            });
+            
+            currentPage = 1; // Reset to first page when searching
+            renderRecords(); // This will use the updated filteredRecords
+            hideLoading();
+        }, 300);
+    }
+
     if (searchInput) {
         // Clear existing listeners
         const newSearchInput = searchInput.cloneNode(true);
         searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        newSearchInput.addEventListener('input', handleSearch);
+    }
+
+    // Add clear search functionality
+    if (clearSearchBtn) {
+        // Clear existing listeners
+        const newClearSearchBtn = clearSearchBtn.cloneNode(true);
+        clearSearchBtn.parentNode.replaceChild(newClearSearchBtn, clearSearchBtn);
         
-        let debounceTimer;
-        newSearchInput.addEventListener('input', (e) => {
-            showLoading();
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const searchTerm = e.target.value.toLowerCase();
-                // Update filteredRecords based on search and user region
-                filteredRecords = records.filter(record => {
-                    const leadRegion = record.fields.assigned_to;
-                    const userRegion = JSON.parse(localStorage.getItem('user'))?.region;
-                    
-                    return leadRegion === userRegion && (
-                        record.fields['Contact Person']?.toLowerCase().includes(searchTerm) ||
-                        record.fields['Name of outlet']?.toLowerCase().includes(searchTerm) ||
-                        record.fields['Address']?.toLowerCase().includes(searchTerm)
-                    );
-                });
-                
-                currentPage = 1; // Reset to first page when searching
-                renderRecords(); // This will use the updated filteredRecords
-                hideLoading();
-            }, 300);
+        newClearSearchBtn.addEventListener('click', () => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                handleSearch({ target: searchInput });
+            }
         });
     }
+
+    // Setup sort dropdowns
+    const sortToggles = document.querySelectorAll('.sort-toggle');
+    const sortOptions = document.querySelectorAll('.sort-option');
+    
+    // Close all dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.sort-dropdown')) {
+            document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+
+    // Toggle dropdown on button click
+    sortToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = toggle.closest('.sort-dropdown');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.sort-dropdown').forEach(other => {
+                if (other !== dropdown) {
+                    other.classList.remove('active');
+                }
+            });
+            
+            // Toggle current dropdown
+            dropdown.classList.toggle('active');
+        });
+    });
+
+    // Handle sort option selection
+    sortOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const field = option.getAttribute('data-field');
+            const order = option.getAttribute('data-order');
+            
+            showLoading();
+            
+            // Sort the records
+            filteredRecords.sort((a, b) => {
+                const valueA = a.fields[field] || '';
+                const valueB = b.fields[field] || '';
+                
+                // Special handling for different field types
+                switch(field) {
+                    case 'Rating':
+                        const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
+                        const ratingA = ratingOrder[valueA] || 0;
+                        const ratingB = ratingOrder[valueB] || 0;
+                        return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                        
+                    case 'Last Visit Date':
+                    case 'Next Visit Date':
+                        const dateA = valueA ? new Date(valueA).getTime() : 0;
+                        const dateB = valueB ? new Date(valueB).getTime() : 0;
+                        return order === 'asc' ? dateA - dateB : dateB - dateA;
+                        
+                    case 'Closing Probability':
+                        const probA = parseFloat(valueA) || 0;
+                        const probB = parseFloat(valueB) || 0;
+                        return order === 'asc' ? probA - probB : probB - probA;
+                        
+                    default:
+                        // Text fields (Contact Person, Name of outlet)
+                        const textA = valueA.toString().toLowerCase();
+                        const textB = valueB.toString().toLowerCase();
+                        if (order === 'asc') {
+                            return textA.localeCompare(textB);
+                        } else {
+                            return textB.localeCompare(textA);
+                        }
+                }
+            });
+            
+            // Close the dropdown
+            option.closest('.sort-dropdown').classList.remove('active');
+            
+            currentPage = 1; // Reset to first page when sorting
+            renderRecords();
+            hideLoading();
+        });
+    });
 }
 
 // Add function to update record count
@@ -217,6 +401,7 @@ function updateRecordCount(count) {
 function createTableRow(lead) {
     const status = lead.fields['Status'] || 'new lead';
     const statusClass = getStatusClass(status);
+    
     return `
         <tr class="${statusClass}">
             <td>${lead.fields['Contact Person'] || '-'}</td>
@@ -238,6 +423,14 @@ function createTableRow(lead) {
             <td>${lead.fields['Follow Up Actions'] || '-'}</td>
             <td>${lead.fields['Remarks'] || '-'}</td>
             <td>
+                ${lead.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${lead.fields['Rating'].toLowerCase()}">${lead.fields['Rating']}</span>` 
+                    : '-'}
+            </td>
+            <td>${lead.fields['Last Visit Date'] || '-'}</td>
+            <td>${lead.fields['Next Visit Date'] || '-'}</td>
+            <td>${lead.fields['Closing Probability'] ? Math.round(lead.fields['Closing Probability'] * 100) + '%' : '-'}</td>
+            <td>
                 <span class="status-badge ${getStatusBadgeClass(status)}">
                     ${status.charAt(0).toUpperCase() + status.slice(1)}
                 </span>
@@ -255,13 +448,17 @@ function createTableRow(lead) {
 function createLeadCard(lead) {
     const status = lead.fields['Status'] || 'new lead';
     const statusClass = getStatusClass(status);
+    const statusBadgeClass = getStatusBadgeClass(status);
+    const visitInfo = getVisitStatus(lead.fields['Last Visit Date'], lead.fields['Next Visit Date']);
+    const visitBadgeClass = getVisitBadgeClass(visitInfo.status);
+
     const div = document.createElement('div');
     div.className = `lead-card ${statusClass}`;
     div.innerHTML = `
         <div class="lead-card-header">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h4>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</h4>
-                <span class="status-badge ${getStatusBadgeClass(status)}">
+                <span class="status-badge ${statusBadgeClass}">
                     ${status.charAt(0).toUpperCase() + status.slice(1)}
                 </span>
             </div>
@@ -270,6 +467,17 @@ function createLeadCard(lead) {
                 <p><strong>Position:</strong> ${lead.fields['Position'] || '-'}</p>
                 <p><i class="bi bi-telephone"></i> ${lead.fields['Tel'] || 'No phone'}</p>
                 <p><i class="bi bi-envelope"></i> ${lead.fields['Email'] || '-'}</p>
+                <p><strong>Rating:</strong> ${lead.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${lead.fields['Rating'].toLowerCase()}">${lead.fields['Rating']}</span>` 
+                    : '-'}</p>
+                <p><strong>Last Visit:</strong> ${lead.fields['Last Visit Date'] || '-'}</p>
+                <p class="visit-status">
+                    <strong>Next Visit:</strong> ${lead.fields['Next Visit Date'] || '-'}
+                    ${lead.fields['Next Visit Date'] ? 
+                        `<span class="${visitBadgeClass}">${visitInfo.message}</span>` 
+                        : ''}
+                </p>
+                <p><strong>Closing Probability:</strong> ${lead.fields['Closing Probability'] ? Math.round(lead.fields['Closing Probability'] * 100) + '%' : '-'}</p>
             </div>
         </div>
         
@@ -347,6 +555,83 @@ function getStatusBadgeClass(status) {
         default:
             return 'status-badge-new'; // Default to new lead if status is unknown
     }
+}
+
+function getVisitStatus(lastVisitDate, nextVisitDate) {
+    const today = new Date();
+    const next = nextVisitDate ? new Date(nextVisitDate) : null;
+
+    if (!next) return { status: 'no-visit', message: 'No visit scheduled' };
+
+    const daysUntilNext = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilNext < 0) {
+        return { 
+            status: 'overdue', 
+            message: `Overdue by ${Math.abs(daysUntilNext)} days`,
+            daysUntil: daysUntilNext
+        };
+    } else if (daysUntilNext === 0) {
+        return { 
+            status: 'today', 
+            message: 'Visit scheduled for today',
+            daysUntil: 0
+        };
+    } else if (daysUntilNext <= 7) {
+        return { 
+            status: 'upcoming', 
+            message: `Visit in ${daysUntilNext} days`,
+            daysUntil: daysUntilNext
+        };
+    } else {
+        return { 
+            status: 'scheduled', 
+            message: `Visit in ${daysUntilNext} days`,
+            daysUntil: daysUntilNext
+        };
+    }
+}
+
+function getVisitBadgeClass(visitStatus) {
+    switch(visitStatus) {
+        case 'overdue':
+            return 'badge bg-danger';
+        case 'today':
+            return 'badge bg-warning';
+        case 'upcoming':
+            return 'badge bg-info';
+        case 'scheduled':
+            return 'badge bg-success';
+        default:
+            return 'badge bg-secondary';
+    }
+}
+
+// Update the getUpcomingVisits function to also get overdue visits
+function getUpcomingVisits() {
+    const today = new Date();
+    return filteredRecords
+        .map(lead => {
+            const nextVisit = lead.fields['Next Visit Date'] ? new Date(lead.fields['Next Visit Date']) : null;
+            if (!nextVisit) return null;
+            
+            return {
+                lead,
+                visitInfo: getVisitStatus(lead.fields['Last Visit Date'], lead.fields['Next Visit Date'])
+            };
+        })
+        .filter(item => 
+            item !== null && 
+            (item.visitInfo.status === 'today' || 
+             item.visitInfo.status === 'upcoming' ||
+             item.visitInfo.status === 'overdue')
+        )
+        .sort((a, b) => {
+            // Sort overdue visits first, then today, then upcoming
+            if (a.visitInfo.status === 'overdue' && b.visitInfo.status !== 'overdue') return -1;
+            if (b.visitInfo.status === 'overdue' && a.visitInfo.status !== 'overdue') return 1;
+            return a.visitInfo.daysUntil - b.visitInfo.daysUntil;
+        });
 }
 
 // Make editLead available globally

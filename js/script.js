@@ -169,6 +169,15 @@ function createTableRow(record) {
             <td>${record.fields['Beer Bottle Products'] || ''}</td>
             <td>${record.fields['Estimated Monthly Consumption (Cartons)'] || ''}</td>
             <td>${record.fields['Soju Products'] || ''}</td>
+            <td>
+                ${record.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${record.fields['Rating'].toLowerCase()}">${record.fields['Rating']}</span>` 
+                    : ''}
+            </td>
+            <td>${record.fields['Last Visit Date'] || ''}</td>
+            <td>${record.fields['Next Visit Date'] || ''}</td>
+            <td>${record.fields['Closing Probability'] !== undefined && record.fields['Closing Probability'] !== null ? 
+                `${Math.round(record.fields['Closing Probability'] * 100)}%` : ''}</td>
             <td>${record.fields['Proposed Products & HL Target'] || ''}</td>
             <td>${record.fields['Follow Up Actions'] || ''}</td>
             <td>${record.fields['Remarks'] || ''}</td>
@@ -225,6 +234,12 @@ function createMobileCard(record) {
                     <p><strong>Target:</strong> ${record.fields['Proposed Products & HL Target'] || '-'}</p>
                     <p><strong>Follow Up:</strong> ${record.fields['Follow Up Actions'] || '-'}</p>
                     <p><strong>Remarks:</strong> ${record.fields['Remarks'] || '-'}</p>
+                    <p><strong>Rating:</strong> ${record.fields['Rating'] ? 
+                        `<span class="rating-badge rating-${record.fields['Rating'].toLowerCase()}">${record.fields['Rating']}</span>` 
+                        : '-'}</p>
+                    <p><strong>Last Visit:</strong> ${record.fields['Last Visit Date'] || '-'}</p>
+                    <p><strong>Next Visit:</strong> ${record.fields['Next Visit Date'] || '-'}</p>
+                    <p><strong>Closing Probability:</strong> ${record.fields['Closing Probability'] ? Math.round(record.fields['Closing Probability'] * 100) + '%' : '-'}</p>
                 </div>
             </div>
             
@@ -359,6 +374,91 @@ function setupSearch() {
             clearButton.addEventListener('click', clearSearch);
         }
     }
+
+    // Setup sort dropdowns
+    const sortToggles = document.querySelectorAll('.sort-toggle');
+    const sortOptions = document.querySelectorAll('.sort-option');
+    
+    // Close all dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.sort-dropdown')) {
+            document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+
+    // Toggle dropdown on button click
+    sortToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = toggle.closest('.sort-dropdown');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.sort-dropdown').forEach(other => {
+                if (other !== dropdown) {
+                    other.classList.remove('active');
+                }
+            });
+            
+            // Toggle current dropdown
+            dropdown.classList.toggle('active');
+        });
+    });
+
+    // Handle sort option selection
+    sortOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const field = option.getAttribute('data-field');
+            const order = option.getAttribute('data-order');
+            
+            showLoading();
+            
+            // Sort the records
+            filteredRecords.sort((a, b) => {
+                const valueA = a.fields[field] || '';
+                const valueB = b.fields[field] || '';
+                
+                // Special handling for different field types
+                switch(field) {
+                    case 'Rating':
+                        const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
+                        const ratingA = ratingOrder[valueA] || 0;
+                        const ratingB = ratingOrder[valueB] || 0;
+                        return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                        
+                    case 'Last Visit Date':
+                    case 'Next Visit Date':
+                        const dateA = valueA ? new Date(valueA).getTime() : 0;
+                        const dateB = valueB ? new Date(valueB).getTime() : 0;
+                        return order === 'asc' ? dateA - dateB : dateB - dateA;
+                        
+                    case 'Closing Probability':
+                        const probA = parseFloat(valueA) || 0;
+                        const probB = parseFloat(valueB) || 0;
+                        return order === 'asc' ? probA - probB : probB - probA;
+                        
+                    default:
+                        // Text fields (Contact Person, Name of outlet)
+                        const textA = valueA.toString().toLowerCase();
+                        const textB = valueB.toString().toLowerCase();
+                        if (order === 'asc') {
+                            return textA.localeCompare(textB);
+                        } else {
+                            return textB.localeCompare(textA);
+                        }
+                }
+            });
+            
+            // Close the dropdown
+            option.closest('.sort-dropdown').classList.remove('active');
+            
+            currentPage = 1; // Reset to first page when sorting
+            renderRecords();
+            hideLoading();
+        });
+    });
 }
 
 // Make functions available globally

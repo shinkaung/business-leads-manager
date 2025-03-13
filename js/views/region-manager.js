@@ -189,6 +189,88 @@ function setupSearch() {
             }, 300);
         });
     }
+
+    // Set up sort dropdowns
+    const sortToggles = document.querySelectorAll('.sort-toggle');
+    const sortDropdowns = document.querySelectorAll('.sort-dropdown');
+
+    // Close all dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.sort-dropdown')) {
+            sortDropdowns.forEach(dropdown => {
+                dropdown.querySelector('.sort-menu').style.display = 'none';
+            });
+        }
+    });
+
+    // Toggle dropdown visibility
+    sortToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menu = toggle.nextElementSibling;
+            const isVisible = menu.style.display === 'block';
+            
+            // Close all other dropdowns
+            sortDropdowns.forEach(dropdown => {
+                dropdown.querySelector('.sort-menu').style.display = 'none';
+            });
+            
+            // Toggle this dropdown
+            menu.style.display = isVisible ? 'none' : 'block';
+        });
+    });
+
+    // Add click handlers for sort options
+    const sortOptions = document.querySelectorAll('.sort-option');
+    sortOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const field = option.dataset.field;
+            const order = option.dataset.order;
+            
+            showLoading();
+            
+            // Sort the filtered records
+            filteredRecords.sort((a, b) => {
+                const aValue = a.fields[field];
+                const bValue = b.fields[field];
+                
+                if (field === 'Rating') {
+                    const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1 };
+                    const aRating = ratingOrder[aValue] || 0;
+                    const bRating = ratingOrder[bValue] || 0;
+                    return order === 'asc' ? aRating - bRating : bRating - aRating;
+                }
+                
+                if (field === 'Last Visit Date' || field === 'Next Visit Date') {
+                    const aDate = aValue ? new Date(aValue.split('/').reverse().join('-')) : new Date(0);
+                    const bDate = bValue ? new Date(bValue.split('/').reverse().join('-')) : new Date(0);
+                    return order === 'asc' ? aDate - bDate : bDate - aDate;
+                }
+                
+                if (field === 'Closing Probability') {
+                    const aProb = aValue || 0;
+                    const bProb = bValue || 0;
+                    return order === 'asc' ? aProb - bProb : bProb - aProb;
+                }
+                
+                // Default string comparison
+                const aStr = aValue || '';
+                const bStr = bValue || '';
+                return order === 'asc' ? 
+                    aStr.localeCompare(bStr) : 
+                    bStr.localeCompare(aStr);
+            });
+            
+            // Close the dropdown
+            option.closest('.sort-menu').style.display = 'none';
+            
+            // Reset to first page and render
+            currentPage = 1;
+            renderRecords();
+            hideLoading();
+        });
+    });
 }
 
 function updateRecordCount(count) {
@@ -224,6 +306,14 @@ function createTableRow(lead) {
             <td>${lead.fields['Follow Up Actions'] || ''}</td>
             <td>${lead.fields['Remarks'] || ''}</td>
             <td>
+                ${lead.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${lead.fields['Rating'].toLowerCase()}">${lead.fields['Rating']}</span>` 
+                    : ''}
+            </td>
+            <td>${lead.fields['Last Visit Date'] || ''}</td>
+            <td>${lead.fields['Next Visit Date'] || ''}</td>
+            <td>${lead.fields['Closing Probability'] ? Math.round(lead.fields['Closing Probability'] * 100) + '%' : ''}</td>
+            <td>
                 <span class="status-badge ${statusBadgeClass}">
                     ${status.charAt(0).toUpperCase() + status.slice(1)}
                 </span>
@@ -258,6 +348,13 @@ function createLeadCard(lead) {
                 <p><strong>Position:</strong> ${lead.fields['Position'] || '-'}</p>
                 <p><strong>Tel:</strong> ${lead.fields['Tel'] || '-'}</p>
                 <p><strong>Email:</strong> ${lead.fields['Email'] || '-'}</p>
+                <p><strong>Rating:</strong> ${lead.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${lead.fields['Rating'].toLowerCase()}">${lead.fields['Rating']}</span>` 
+                    : '-'}</p>
+                <p><strong>Last Visit:</strong> ${lead.fields['Last Visit Date'] || '-'}</p>
+                <p><strong>Next Visit:</strong> ${lead.fields['Next Visit Date'] || '-'}</p>
+                <p><strong>Closing Probability:</strong> ${lead.fields['Closing Probability'] ? Math.round(lead.fields['Closing Probability'] * 100) + '%' : '-'}</p>
+                <p><strong>Status:</strong> <span class="status-badge ${statusBadgeClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></p>
             </div>
         </div>
         

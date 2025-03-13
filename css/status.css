@@ -1,0 +1,75 @@
+/* Status badge styles */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    min-width: 100px;
+}
+
+.status-badge-new {
+    background-color: var(--status-new) !important;
+    color: white !important;
+}
+
+.status-badge-qualified {
+    background-color: var(--status-qualified) !important;
+    color: white !important;
+}
+
+.status-badge-existing {
+    background-color: var(--status-existing) !important;
+    color: white !important;
+}
+
+/* Row status styling */
+.status-new {
+    background-color: rgba(255, 68, 68, 0.05) !important;
+    border-left: 4px solid var(--new-color) !important;
+}
+
+.status-qualified {
+    background-color: rgba(255, 152, 0, 0.05) !important;
+    border-left: 4px solid var(--qualified-color) !important;
+}
+
+.status-existing {
+    background-color: rgba(76, 175, 80, 0.05) !important;
+    border-left: 4px solid var(--existing-color) !important;
+}
+
+/* Rating badge styles */
+.rating-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;
+}
+
+.rating-gold {
+    background-color: #FFD700;
+    color: #000;
+    border: 1px solid #DAA520;
+}
+
+.rating-silver {
+    background-color: #C0C0C0;
+    color: #000;
+    border: 1px solid #A9A9A9;
+}
+
+.rating-bronze {
+    background-color: #CD7F32;
+    color: white;
+    border: 1px solid #8B4513;
+}
+
+/* Add hover effect for rating badges */
+.rating-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+} 

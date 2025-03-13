@@ -209,3 +209,118 @@
         display: block;
     }
 } 
+
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    /* Hide table on mobile */
+    .table-responsive {
+        display: none;
+    }
+
+    /* Show cards on mobile */
+    .mobile-cards {
+        display: block;
+    }
+
+    /* Mobile card styling */
+    .mobile-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        padding: 1rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-card-header {
+        border-bottom: 1px solid #eee;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .mobile-card-field {
+        display: flex;
+        margin: 0.5rem 0;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mobile-card-label {
+        font-weight: bold;
+        width: 40%;
+        color: #666;
+    }
+
+    .mobile-card-value {
+        width: 60%;
+        word-break: break-word;
+    }
+
+    .mobile-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+
+    /* Mobile status styling */
+    .mobile-card.status-new {
+        background-color: #ffebee !important;
+        border-left: 4px solid #f44336 !important;
+    }
+
+    .mobile-card.status-qualified {
+        background-color: #fff3e0 !important;
+        border-left: 4px solid #ff9800 !important;
+    }
+
+    .mobile-card.status-existing {
+        background-color: #e8f5e9 !important;
+        border-left: 4px solid #4caf50 !important;
+    }
+
+    /* Action bar adjustments */
+    .action-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .action-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Button adjustments */
+    .btn-mobile {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    /* Pagination adjustments */
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .pagination-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #recordsPerPage {
+        width: 80px;
+    }
+}
+
+/* Desktop-only styles */
+@media screen and (min-width: 769px) {
+    .mobile-cards {
+        display: none;
+    }
+} 

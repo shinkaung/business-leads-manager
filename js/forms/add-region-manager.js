@@ -1,6 +1,41 @@
 import { createAirtableRecord } from '../shared/airtable.js';
 import { initializeAutocomplete } from '../shared/autocomplete.js';
 
+// Constants for visit scheduling
+const VISIT_INTERVALS = {
+    'Gold': 30,
+    'Silver': 45,
+    'Bronze': 60,
+    'default': 60
+};
+
+function setupVisitDateLogic() {
+    const ratingSelect = document.getElementById('Rating');
+    const nextVisitDateInput = document.getElementById('Next Visit Date');
+    const lastVisitDateInput = document.getElementById('Last Visit Date');
+
+    function updateNextVisitDate() {
+        if (!lastVisitDateInput.value) return;
+
+        const rating = ratingSelect.value;
+        const lastVisitDate = new Date(lastVisitDateInput.value);
+        const interval = VISIT_INTERVALS[rating] || VISIT_INTERVALS.default;
+
+        const nextVisitDate = new Date(lastVisitDate);
+        nextVisitDate.setDate(nextVisitDate.getDate() + interval);
+
+        // Format the date as YYYY-MM-DD for the input
+        const nextVisitDateStr = nextVisitDate.toISOString().split('T')[0];
+        nextVisitDateInput.value = nextVisitDateStr;
+    }
+
+    // Update next visit date when rating changes
+    ratingSelect.addEventListener('change', updateNextVisitDate);
+
+    // Update next visit date when last visit date changes
+    lastVisitDateInput.addEventListener('change', updateNextVisitDate);
+}
+
 function setupFormSubmission() {
     const form = document.getElementById('addRecordForm');
     if (!form) return;
@@ -12,7 +47,12 @@ function setupFormSubmission() {
         const record = {};
         
         formData.forEach((value, key) => {
-            if (value) record[key] = value;
+            if (key === 'Closing Probability') {
+                // Convert the percentage value to decimal (40 becomes 0.4)
+                record[key] = parseInt(value) / 100;
+            } else {
+                record[key] = value;
+            }
         });
 
         // Set default status if not provided
@@ -24,6 +64,22 @@ function setupFormSubmission() {
         const userRegion = getUserRegion();
         if (userRegion) {
             record['assigned_to'] = userRegion;
+        }
+
+        // Calculate next visit date if last visit date is set but next visit date isn't
+        if (record['Last Visit Date'] && !record['Next Visit Date']) {
+            const lastVisitDate = new Date(record['Last Visit Date']);
+            const rating = record['Rating'];
+            const interval = VISIT_INTERVALS[rating] || VISIT_INTERVALS.default;
+            
+            const nextVisitDate = new Date(lastVisitDate);
+            nextVisitDate.setDate(nextVisitDate.getDate() + interval);
+            
+            // Format as DD/MM/YYYY
+            const day = nextVisitDate.getDate().toString().padStart(2, '0');
+            const month = (nextVisitDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = nextVisitDate.getFullYear();
+            record['Next Visit Date'] = `${day}/${month}/${year}`;
         }
 
         try {
@@ -79,4 +135,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializeAutocomplete();
     setupFormSubmission();
+    setupVisitDateLogic(); // Initialize visit date logic
 });
