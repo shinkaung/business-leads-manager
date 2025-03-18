@@ -122,6 +122,9 @@ function renderRecords() {
                                     </span>
                                 ` : ''}
                             </div>
+                            ${overdueVisits.length > 3 ? `
+                                <small class="text-muted">Scroll to see ${overdueVisits.length - 3} more</small>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="reminder-list">
@@ -152,7 +155,12 @@ function renderRecords() {
                                     </span>
                                 ` : ''}
                             </div>
-                            <small class="text-muted">Next 7 days</small>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-2">Next 7 days</small>
+                                ${upcomingAndTodayVisits.length > 3 ? `
+                                    <small class="text-muted">Scroll to see ${upcomingAndTodayVisits.length - 3} more</small>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                     <div class="reminder-list">
@@ -252,7 +260,7 @@ function initializePagination() {
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearch');
-    let debounceTimer; // Move debounceTimer outside the if block
+    let debounceTimer;
 
     function handleSearch(e) {
         showLoading();
@@ -304,7 +312,7 @@ function setupSearch() {
         });
     }
 
-    // Setup sort dropdowns
+    // Setup desktop sort dropdowns
     const sortToggles = document.querySelectorAll('.sort-toggle');
     const sortOptions = document.querySelectorAll('.sort-option');
     
@@ -337,57 +345,100 @@ function setupSearch() {
 
     // Handle sort option selection
     sortOptions.forEach(option => {
+        option.addEventListener('click', handleSortOption);
+    });
+
+    // Setup mobile sort functionality
+    const mobileSortBtn = document.getElementById('mobileSortBtn');
+    const mobileSortMenu = document.getElementById('mobileSortMenu');
+    const closeMobileSort = document.getElementById('closeMobileSort');
+    const mobileBackdrop = document.createElement('div');
+    mobileBackdrop.className = 'mobile-sort-backdrop';
+    document.body.appendChild(mobileBackdrop);
+
+    function showMobileSort() {
+        mobileSortMenu.style.display = 'block';
+        mobileBackdrop.classList.add('active');
+        setTimeout(() => {
+            mobileSortMenu.classList.add('active');
+        }, 10);
+    }
+
+    function hideMobileSort() {
+        mobileSortMenu.classList.remove('active');
+        mobileBackdrop.classList.remove('active');
+        setTimeout(() => {
+            mobileSortMenu.style.display = 'none';
+        }, 300);
+    }
+
+    if (mobileSortBtn) {
+        mobileSortBtn.addEventListener('click', showMobileSort);
+    }
+
+    if (closeMobileSort) {
+        closeMobileSort.addEventListener('click', hideMobileSort);
+    }
+
+    mobileBackdrop.addEventListener('click', hideMobileSort);
+
+    // Handle mobile sort options
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
+    mobileSortOptions.forEach(option => {
         option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const field = option.getAttribute('data-field');
-            const order = option.getAttribute('data-order');
-            
-            showLoading();
-            
-            // Sort the records
-            filteredRecords.sort((a, b) => {
-                const valueA = a.fields[field] || '';
-                const valueB = b.fields[field] || '';
-                
-                // Special handling for different field types
-                switch(field) {
-                    case 'Rating':
-                        const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
-                        const ratingA = ratingOrder[valueA] || 0;
-                        const ratingB = ratingOrder[valueB] || 0;
-                        return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
-                        
-                    case 'Last Visit Date':
-                    case 'Next Visit Date':
-                        const dateA = valueA ? new Date(valueA).getTime() : 0;
-                        const dateB = valueB ? new Date(valueB).getTime() : 0;
-                        return order === 'asc' ? dateA - dateB : dateB - dateA;
-                        
-                    case 'Closing Probability':
-                        const probA = parseFloat(valueA) || 0;
-                        const probB = parseFloat(valueB) || 0;
-                        return order === 'asc' ? probA - probB : probB - probA;
-                        
-                    default:
-                        // Text fields (Contact Person, Name of outlet)
-                        const textA = valueA.toString().toLowerCase();
-                        const textB = valueB.toString().toLowerCase();
-                        if (order === 'asc') {
-                            return textA.localeCompare(textB);
-                        } else {
-                            return textB.localeCompare(textA);
-                        }
-                }
-            });
-            
-            // Close the dropdown
-            option.closest('.sort-dropdown').classList.remove('active');
-            
-            currentPage = 1; // Reset to first page when sorting
-            renderRecords();
-            hideLoading();
+            handleSortOption(e);
+            hideMobileSort();
         });
     });
+
+    // Shared sort handling function
+    function handleSortOption(e) {
+        e.stopPropagation();
+        const field = e.target.getAttribute('data-field');
+        const order = e.target.getAttribute('data-order');
+        
+        showLoading();
+        
+        // Sort the records
+        filteredRecords.sort((a, b) => {
+            const valueA = a.fields[field] || '';
+            const valueB = b.fields[field] || '';
+            
+            // Special handling for different field types
+            switch(field) {
+                case 'Rating':
+                    const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
+                    const ratingA = ratingOrder[valueA] || 0;
+                    const ratingB = ratingOrder[valueB] || 0;
+                    return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                    
+                case 'Last Visit Date':
+                case 'Next Visit Date':
+                    const dateA = valueA ? new Date(valueA).getTime() : 0;
+                    const dateB = valueB ? new Date(valueB).getTime() : 0;
+                    return order === 'asc' ? dateA - dateB : dateB - dateA;
+                    
+                case 'Closing Probability':
+                    const probA = parseFloat(valueA) || 0;
+                    const probB = parseFloat(valueB) || 0;
+                    return order === 'asc' ? probA - probB : probB - probA;
+                    
+                default:
+                    // Text fields (Contact Person, Name of outlet)
+                    const textA = valueA.toString().toLowerCase();
+                    const textB = valueB.toString().toLowerCase();
+                    if (order === 'asc') {
+                        return textA.localeCompare(textB);
+                    } else {
+                        return textB.localeCompare(textA);
+                    }
+            }
+        });
+        
+        currentPage = 1; // Reset to first page when sorting
+        renderRecords();
+        hideLoading();
+    }
 }
 
 // Add function to update record count
@@ -436,8 +487,7 @@ function createTableRow(lead) {
                 </span>
             </td>
             <td>
-                <button class="btn btn-sm btn-outline-primary" 
-                        onclick="editLead('${lead.id}')">
+                <button class="btn btn-outline-primary" onclick="editLead('${lead.id}')">
                     <i class="bi bi-pencil"></i> Edit
                 </button>
             </td>

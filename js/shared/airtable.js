@@ -195,18 +195,29 @@ async function updateAirtableRecord(recordId, fields) {
 
 // Delete record function
 async function deleteAirtableRecord(recordId) {
-    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
-    const response = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
-            'Content-Type': 'application/json'
+    try {
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
+        
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Failed to delete record');
         }
-    });
 
-    if (!response.ok) {
-        throw new Error('Failed to delete record');
+        // Clear cache after successful deletion
+        localStorage.removeItem(CACHE_KEY);
+        cachedRecords = null;
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error in deleteAirtableRecord:', error);
+        throw error;
     }
-
-    return await response.json();
 } 

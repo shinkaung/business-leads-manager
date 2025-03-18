@@ -3,10 +3,9 @@ import { initializeAutocomplete } from '../shared/autocomplete.js';
 
 // Constants for visit scheduling
 const VISIT_INTERVALS = {
-    'Gold': 30,
-    'Silver': 45,
-    'Bronze': 60,
-    'default': 60
+    'Gold': 30,   // 1 month
+    'Silver': 45, // 1.5 months
+    'Bronze': 60  // 2 months
 };
 
 function setupVisitDateLogic() {
@@ -15,7 +14,7 @@ function setupVisitDateLogic() {
     const lastVisitDateInput = document.getElementById('Last Visit Date');
 
     function updateNextVisitDate() {
-        if (!lastVisitDateInput.value) return;
+        if (!lastVisitDateInput.value || !ratingSelect.value) return;
 
         const rating = ratingSelect.value;
         const lastVisitDate = new Date(lastVisitDateInput.value);
@@ -47,11 +46,17 @@ function setupFormSubmission() {
         const record = {};
         
         formData.forEach((value, key) => {
-            if (key === 'Closing Probability') {
-                // Convert the percentage value to decimal (40 becomes 0.4)
-                record[key] = parseInt(value) / 100;
-            } else {
-                record[key] = value;
+            // Only add non-empty values to the record
+            if (value) {
+                if (key === 'Closing Probability') {
+                    // Convert percentage value to decimal for Airtable (40 -> 0.4)
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                        record[key] = numValue / 100;
+                    }
+                } else {
+                    record[key] = value;
+                }
             }
         });
 
@@ -67,7 +72,7 @@ function setupFormSubmission() {
         }
 
         // Calculate next visit date if last visit date is set but next visit date isn't
-        if (record['Last Visit Date'] && !record['Next Visit Date']) {
+        if (record['Last Visit Date'] && !record['Next Visit Date'] && record['Rating']) {
             const lastVisitDate = new Date(record['Last Visit Date']);
             const rating = record['Rating'];
             const interval = VISIT_INTERVALS[rating] || VISIT_INTERVALS.default;
@@ -75,11 +80,8 @@ function setupFormSubmission() {
             const nextVisitDate = new Date(lastVisitDate);
             nextVisitDate.setDate(nextVisitDate.getDate() + interval);
             
-            // Format as DD/MM/YYYY
-            const day = nextVisitDate.getDate().toString().padStart(2, '0');
-            const month = (nextVisitDate.getMonth() + 1).toString().padStart(2, '0');
-            const year = nextVisitDate.getFullYear();
-            record['Next Visit Date'] = `${day}/${month}/${year}`;
+            // Format as YYYY-MM-DD
+            record['Next Visit Date'] = nextVisitDate.toISOString().split('T')[0];
         }
 
         try {

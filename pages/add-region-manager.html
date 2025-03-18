@@ -37,15 +37,8 @@
                 <!-- Outlet Information -->
                 <div class="col-md-6">
                     <label for="Name of outlet" class="form-label">Name of Outlet</label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="Name of outlet" 
-                           id="Name of outlet"
-                           list="outletList"
-                           autocomplete="off">
-                    <datalist id="outletList">
-                        <!-- Options will be populated dynamically -->
-                    </datalist>
+                    <input type="text" class="form-control" name="Name of outlet" id="Name of outlet" list="outletList">
+                    <datalist id="outletList"></datalist>
                 </div>
                 <div class="col-md-6">
                     <label for="Address" class="form-label">Address</label>
@@ -73,12 +66,7 @@
                 <!-- Products Information -->
                 <div class="col-md-6">
                     <label for="Products on Tap" class="form-label">Products on Tap</label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="Products on Tap" 
-                           id="Products on Tap"
-                           list="productsOnTapList"
-                           autocomplete="off">
+                    <input type="text" class="form-control" name="Products on Tap" id="Products on Tap" list="productsOnTapList">
                     <datalist id="productsOnTapList"></datalist>
                 </div>
                 <div class="col-md-6">
@@ -87,12 +75,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="Beer Bottle Products" class="form-label">Beer Bottle Products</label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="Beer Bottle Products" 
-                           id="Beer Bottle Products"
-                           list="beerBottleProductsList"
-                           autocomplete="off">
+                    <input type="text" class="form-control" name="Beer Bottle Products" id="Beer Bottle Products" list="beerBottleProductsList">
                     <datalist id="beerBottleProductsList"></datalist>
                 </div>
                 <div class="col-md-6">
@@ -101,12 +84,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="Soju Products" class="form-label">Soju Products</label>
-                    <input type="text" 
-                           class="form-control" 
-                           name="Soju Products" 
-                           id="Soju Products"
-                           list="sojuProductsList"
-                           autocomplete="off">
+                    <input type="text" class="form-control" name="Soju Products" id="Soju Products" list="sojuProductsList">
                     <datalist id="sojuProductsList"></datalist>
                 </div>
                 <div class="col-md-6">
@@ -124,7 +102,7 @@
                     <textarea class="form-control" name="Remarks" id="Remarks" rows="3"></textarea>
                 </div>
 
-                <!-- Add this before the Status field -->
+                <!-- Rating and Visit Dates -->
                 <div class="col-md-6">
                     <label for="Rating" class="form-label">Rating</label>
                     <select class="form-control" name="Rating" id="Rating">
@@ -137,34 +115,20 @@
 
                 <div class="col-md-6">
                     <label for="Last Visit Date" class="form-label">Last Visit Date</label>
-                    <input type="date" 
-                           class="form-control" 
-                           name="Last Visit Date" 
-                           id="Last Visit Date"
-                           onchange="formatDate(this)">
+                    <input type="date" class="form-control" name="Last Visit Date" id="Last Visit Date">
                 </div>
 
                 <div class="col-md-6">
                     <label for="Next Visit Date" class="form-label">Next Visit Date</label>
-                    <input type="date" 
-                           class="form-control" 
-                           name="Next Visit Date" 
-                           id="Next Visit Date"
-                           onchange="formatDate(this)">
+                    <input type="date" class="form-control" name="Next Visit Date" id="Next Visit Date">
                 </div>
 
                 <div class="col-md-6">
                     <label for="Closing Probability" class="form-label">Closing Probability (%)</label>
-                    <input type="number" 
-                           class="form-control" 
-                           name="Closing Probability" 
-                           id="Closing Probability"
-                           min="0"
-                           max="100"
-                           step="1">
+                    <input type="number" class="form-control" name="Closing Probability" id="Closing Probability" min="0" max="100" step="1">
                 </div>
 
-                <!-- Add this before the Status field -->
+                <!-- Assigned Region -->
                 <div class="col-md-6">
                     <label for="assigned_to" class="form-label">Assigned Region</label>
                     <select class="form-control" name="assigned_to" id="assigned_to">
@@ -177,6 +141,7 @@
                     </select>
                 </div>
 
+                <!-- Status -->
                 <div class="col-md-6">
                     <label for="Status" class="form-label">Status</label>
                     <select class="form-control" name="Status" id="Status">
@@ -197,16 +162,5 @@
     <script type="module" src="../js/shared/airtable.js"></script>
     <script type="module" src="../js/shared/autocomplete.js"></script>
     <script type="module" src="../js/forms/add-region-manager.js"></script>
-    <script>
-        function formatDate(input) {
-            if (input.value) {
-                const date = new Date(input.value);
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const year = date.getFullYear();
-                input.dataset.formattedValue = `${day}/${month}/${year}`;
-            }
-        }
-    </script>
 </body>
 </html> 

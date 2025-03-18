@@ -190,87 +190,133 @@ function setupSearch() {
         });
     }
 
-    // Set up sort dropdowns
+    // Setup desktop sort dropdowns
     const sortToggles = document.querySelectorAll('.sort-toggle');
-    const sortDropdowns = document.querySelectorAll('.sort-dropdown');
-
+    const sortOptions = document.querySelectorAll('.sort-option');
+    
     // Close all dropdowns when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.sort-dropdown')) {
-            sortDropdowns.forEach(dropdown => {
-                dropdown.querySelector('.sort-menu').style.display = 'none';
+            document.querySelectorAll('.sort-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
             });
         }
     });
 
-    // Toggle dropdown visibility
+    // Toggle dropdown on button click
     sortToggles.forEach(toggle => {
         toggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            const menu = toggle.nextElementSibling;
-            const isVisible = menu.style.display === 'block';
+            const dropdown = toggle.closest('.sort-dropdown');
             
             // Close all other dropdowns
-            sortDropdowns.forEach(dropdown => {
-                dropdown.querySelector('.sort-menu').style.display = 'none';
+            document.querySelectorAll('.sort-dropdown').forEach(other => {
+                if (other !== dropdown) {
+                    other.classList.remove('active');
+                }
             });
             
-            // Toggle this dropdown
-            menu.style.display = isVisible ? 'none' : 'block';
+            // Toggle current dropdown
+            dropdown.classList.toggle('active');
         });
     });
 
-    // Add click handlers for sort options
-    const sortOptions = document.querySelectorAll('.sort-option');
+    // Handle sort option selection
     sortOptions.forEach(option => {
+        option.addEventListener('click', handleSortOption);
+    });
+
+    // Setup mobile sort functionality
+    const mobileSortBtn = document.getElementById('mobileSortBtn');
+    const mobileSortMenu = document.getElementById('mobileSortMenu');
+    const closeMobileSort = document.getElementById('closeMobileSort');
+    const mobileBackdrop = document.createElement('div');
+    mobileBackdrop.className = 'mobile-sort-backdrop';
+    document.body.appendChild(mobileBackdrop);
+
+    function showMobileSort() {
+        mobileSortMenu.style.display = 'block';
+        mobileBackdrop.classList.add('active');
+        setTimeout(() => {
+            mobileSortMenu.classList.add('active');
+        }, 10);
+    }
+
+    function hideMobileSort() {
+        mobileSortMenu.classList.remove('active');
+        mobileBackdrop.classList.remove('active');
+        setTimeout(() => {
+            mobileSortMenu.style.display = 'none';
+        }, 300);
+    }
+
+    if (mobileSortBtn) {
+        mobileSortBtn.addEventListener('click', showMobileSort);
+    }
+
+    if (closeMobileSort) {
+        closeMobileSort.addEventListener('click', hideMobileSort);
+    }
+
+    mobileBackdrop.addEventListener('click', hideMobileSort);
+
+    // Handle mobile sort options
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
+    mobileSortOptions.forEach(option => {
         option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const field = option.dataset.field;
-            const order = option.dataset.order;
-            
-            showLoading();
-            
-            // Sort the filtered records
-            filteredRecords.sort((a, b) => {
-                const aValue = a.fields[field];
-                const bValue = b.fields[field];
-                
-                if (field === 'Rating') {
-                    const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1 };
-                    const aRating = ratingOrder[aValue] || 0;
-                    const bRating = ratingOrder[bValue] || 0;
-                    return order === 'asc' ? aRating - bRating : bRating - aRating;
-                }
-                
-                if (field === 'Last Visit Date' || field === 'Next Visit Date') {
-                    const aDate = aValue ? new Date(aValue.split('/').reverse().join('-')) : new Date(0);
-                    const bDate = bValue ? new Date(bValue.split('/').reverse().join('-')) : new Date(0);
-                    return order === 'asc' ? aDate - bDate : bDate - aDate;
-                }
-                
-                if (field === 'Closing Probability') {
-                    const aProb = aValue || 0;
-                    const bProb = bValue || 0;
-                    return order === 'asc' ? aProb - bProb : bProb - aProb;
-                }
-                
-                // Default string comparison
-                const aStr = aValue || '';
-                const bStr = bValue || '';
-                return order === 'asc' ? 
-                    aStr.localeCompare(bStr) : 
-                    bStr.localeCompare(aStr);
-            });
-            
-            // Close the dropdown
-            option.closest('.sort-menu').style.display = 'none';
-            
-            // Reset to first page and render
-            currentPage = 1;
-            renderRecords();
-            hideLoading();
+            handleSortOption(e);
+            hideMobileSort();
         });
     });
+
+    // Shared sort handling function
+    function handleSortOption(e) {
+        e.stopPropagation();
+        const field = e.target.getAttribute('data-field');
+        const order = e.target.getAttribute('data-order');
+        
+        showLoading();
+        
+        // Sort the records
+        filteredRecords.sort((a, b) => {
+            const valueA = a.fields[field] || '';
+            const valueB = b.fields[field] || '';
+            
+            // Special handling for different field types
+            switch(field) {
+                case 'Rating':
+                    const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
+                    const ratingA = ratingOrder[valueA] || 0;
+                    const ratingB = ratingOrder[valueB] || 0;
+                    return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                    
+                case 'Last Visit Date':
+                case 'Next Visit Date':
+                    const dateA = valueA ? new Date(valueA).getTime() : 0;
+                    const dateB = valueB ? new Date(valueB).getTime() : 0;
+                    return order === 'asc' ? dateA - dateB : dateB - dateA;
+                    
+                case 'Closing Probability':
+                    const probA = parseFloat(valueA) || 0;
+                    const probB = parseFloat(valueB) || 0;
+                    return order === 'asc' ? probA - probB : probB - probA;
+                    
+                default:
+                    // Text fields (Contact Person, Name of outlet)
+                    const textA = valueA.toString().toLowerCase();
+                    const textB = valueB.toString().toLowerCase();
+                    if (order === 'asc') {
+                        return textA.localeCompare(textB);
+                    } else {
+                        return textB.localeCompare(textA);
+                    }
+            }
+        });
+        
+        currentPage = 1; // Reset to first page when sorting
+        renderRecords();
+        hideLoading();
+    }
 }
 
 function updateRecordCount(count) {

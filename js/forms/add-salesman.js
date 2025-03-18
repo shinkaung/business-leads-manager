@@ -112,11 +112,14 @@ function setupFormSubmission() {
         const record = {};
         
         formData.forEach((value, key) => {
-            if (key === 'Closing Probability') {
-                // Convert the percentage value to decimal (40 becomes 0.4)
-                record[key] = parseInt(value) / 100;
-            } else {
-                record[key] = value;
+            // Only add non-empty values to the record
+            if (value) {
+                if (key === 'Closing Probability') {
+                    // Convert the percentage value to decimal (40 becomes 0.4)
+                    record[key] = parseInt(value) / 100;
+                } else {
+                    record[key] = value;
+                }
             }
         });
 
@@ -136,8 +139,8 @@ function setupFormSubmission() {
         }
 
         // If Last Visit Date is set but Next Visit Date is not, calculate Next Visit Date based on rating
-        if (record['Last Visit Date'] && !record['Next Visit Date']) {
-            const rating = record['Rating'] || 'Bronze';
+        if (record['Last Visit Date'] && !record['Next Visit Date'] && record['Rating']) {
+            const rating = record['Rating'];
             const interval = VISIT_INTERVALS[rating] || 60;
             
             const lastVisitDate = new Date(record['Last Visit Date']);

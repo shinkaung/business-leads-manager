@@ -38,16 +38,22 @@ export function renderRecords() {
 
     if (paginatedRecords.length === 0) {
         tbody.innerHTML = '<tr><td colspan="20" class="text-center">No records found</td></tr>';
+        mobileCards.innerHTML = '<div class="no-records">No records found</div>';
         return;
     }
 
     // Render paginated records
     paginatedRecords.forEach(record => {
+        // Render table row
         tbody.innerHTML += createTableRow(record);
-        mobileCards.innerHTML += createMobileCard(record);
+        
+        // Create and append mobile card
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'lead-card';
+        cardDiv.innerHTML = createLeadCard(record);
+        mobileCards.appendChild(cardDiv);
     });
 
-    // Update total records count
     updateRecordCount(totalRecords);
     
     // Setup mobile card listeners
@@ -186,74 +192,84 @@ function createTableRow(record) {
                     ${status}
                 </span>
             </td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="editRecord('${record.id}')">
-                    <i class="bi bi-pencil"></i> Edit
+            <td class="actions-cell">
+                <button class="btn btn-outline-primary" onclick="editRecord('${record.id}')">
+                    <i class="bi bi-pencil"></i>
+                    <span>Edit</span>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteRecord('${record.id}')">
-                    <i class="bi bi-trash"></i> Delete
+                <button class="btn btn-danger" onclick="deleteRecord('${record.id}')">
+                    <i class="bi bi-trash"></i>
+                    <span>Delete</span>
                 </button>
             </td>
         </tr>
     `;
 }
 
-function createMobileCard(record) {
-    const status = record.fields['Status'] || 'New Lead';
+function createLeadCard(lead) {
+    const status = lead.fields['Status'] || 'new lead';
     const statusClass = getStatusClass(status);
+    const statusBadgeClass = getStatusBadgeClass(status);
+    const visitInfo = getVisitStatus(lead.fields['Last Visit Date'], lead.fields['Next Visit Date']);
+    const visitBadgeClass = getVisitBadgeClass(visitInfo.status);
+
     return `
-        <div class="mobile-card ${statusClass}">
-            <div class="lead-card-header">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h4>${record.fields['Name of outlet'] || 'Unnamed Outlet'}</h4>
-                    <span class="status-badge ${getStatusBadgeClass(status)}">
-                        ${status}
-                    </span>
-                </div>
-                <div class="lead-card-basic-info">
-                    <p><strong>Contact:</strong> ${record.fields['Contact Person'] || 'No contact person'}</p>
-                    <p><strong>Position:</strong> ${record.fields['Position'] || '-'}</p>
-                    <p><strong>Tel:</strong> ${record.fields['Tel'] || '-'}</p>
-                    <p><strong>Email:</strong> ${record.fields['Email'] || '-'}</p>
-                </div>
+        <div class="lead-card-header">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h4>${lead.fields['Name of outlet'] || 'Unnamed Outlet'}</h4>
+                <span class="status-badge ${statusBadgeClass}">
+                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                </span>
             </div>
-            
-            <div class="lead-card-details" style="display: none;">
-                <hr>
-                <div class="details-grid">
-                    <p><strong>Address:</strong> ${record.fields['Address'] || '-'}</p>
-                    <p><strong>Postal Code:</strong> ${record.fields['Postal Code'] || '-'}</p>
-                    <p><strong>Category:</strong> ${record.fields['Category'] || '-'}</p>
-                    <p><strong>Style/Cuisine:</strong> ${record.fields['Style/Type of Cuisine'] || '-'}</p>
-                    <p><strong>Size:</strong> ${record.fields['Size of Establishment'] || '-'}</p>
-                    <p><strong>Products on Tap:</strong> ${record.fields['Products on Tap'] || '-'}</p>
-                    <p><strong>Monthly HL:</strong> ${record.fields['Estimated Monthly Consumption (HL)'] || '-'}</p>
-                    <p><strong>Bottle Products:</strong> ${record.fields['Beer Bottle Products'] || '-'}</p>
-                    <p><strong>Monthly Cartons:</strong> ${record.fields['Estimated Monthly Consumption (Cartons)'] || '-'}</p>
-                    <p><strong>Soju Products:</strong> ${record.fields['Soju Products'] || '-'}</p>
-                    <p><strong>Target:</strong> ${record.fields['Proposed Products & HL Target'] || '-'}</p>
-                    <p><strong>Follow Up:</strong> ${record.fields['Follow Up Actions'] || '-'}</p>
-                    <p><strong>Remarks:</strong> ${record.fields['Remarks'] || '-'}</p>
-                    <p><strong>Rating:</strong> ${record.fields['Rating'] ? 
-                        `<span class="rating-badge rating-${record.fields['Rating'].toLowerCase()}">${record.fields['Rating']}</span>` 
-                        : '-'}</p>
-                    <p><strong>Last Visit:</strong> ${record.fields['Last Visit Date'] || '-'}</p>
-                    <p><strong>Next Visit:</strong> ${record.fields['Next Visit Date'] || '-'}</p>
-                    <p><strong>Closing Probability:</strong> ${record.fields['Closing Probability'] ? Math.round(record.fields['Closing Probability'] * 100) + '%' : '-'}</p>
-                </div>
+            <div class="lead-card-basic-info">
+                <p><strong>Contact:</strong> ${lead.fields['Contact Person'] || 'No contact person'}</p>
+                <p><strong>Position:</strong> ${lead.fields['Position'] || '-'}</p>
+                <p><i class="bi bi-telephone"></i> ${lead.fields['Tel'] || 'No phone'}</p>
+                <p><i class="bi bi-envelope"></i> ${lead.fields['Email'] || '-'}</p>
+                <p><strong>Rating:</strong> ${lead.fields['Rating'] ? 
+                    `<span class="rating-badge rating-${lead.fields['Rating'].toLowerCase()}">${lead.fields['Rating']}</span>` 
+                    : '-'}</p>
+                <p><strong>Last Visit:</strong> ${lead.fields['Last Visit Date'] || '-'}</p>
+                <p class="visit-status">
+                    <strong>Next Visit:</strong> ${lead.fields['Next Visit Date'] || '-'}
+                    ${lead.fields['Next Visit Date'] ? 
+                        `<span class="${visitBadgeClass}">${visitInfo.message}</span>` 
+                        : ''}
+                </p>
+                <p><strong>Closing Probability:</strong> ${lead.fields['Closing Probability'] ? Math.round(lead.fields['Closing Probability'] * 100) + '%' : '-'}</p>
+                <p><strong>Area:</strong> ${lead.fields['assigned_to'] || '-'}</p>
             </div>
-            
-            <div class="lead-card-actions">
-                <button class="btn btn-sm btn-outline-secondary toggle-details">
-                    <i class="bi bi-chevron-down"></i> View Details
-                </button>
-                <button class="btn btn-sm btn-outline-primary" onclick="editRecord('${record.id}')">
-                    <i class="bi bi-pencil"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${record.id}')">
-                    <i class="bi bi-trash"></i> Delete
-                </button>
+        </div>
+        
+        <div class="lead-card-details" style="display: none;">
+            <hr>
+            <div class="details-grid">
+                <p><strong>Address:</strong> ${lead.fields['Address'] || '-'}</p>
+                <p><strong>Postal Code:</strong> ${lead.fields['Postal Code'] || '-'}</p>
+                <p><strong>Category:</strong> ${lead.fields['Category'] || '-'}</p>
+                <p><strong>Style/Cuisine:</strong> ${lead.fields['Style/Type of Cuisine'] || '-'}</p>
+                <p><strong>Size:</strong> ${lead.fields['Size of Establishment'] || '-'}</p>
+                <p><strong>Products on Tap:</strong> ${lead.fields['Products on Tap'] || '-'}</p>
+                <p><strong>Monthly HL:</strong> ${lead.fields['Estimated Monthly Consumption (HL)'] || '-'}</p>
+                <p><strong>Bottle Products:</strong> ${lead.fields['Beer Bottle Products'] || '-'}</p>
+                <p><strong>Monthly Cartons:</strong> ${lead.fields['Estimated Monthly Consumption (Cartons)'] || '-'}</p>
+                <p><strong>Soju Products:</strong> ${lead.fields['Soju Products'] || '-'}</p>
+                <p><strong>Target:</strong> ${lead.fields['Proposed Products & HL Target'] || '-'}</p>
+                <p><strong>Follow Up:</strong> ${lead.fields['Follow Up Actions'] || '-'}</p>
+                <p><strong>Remarks:</strong> ${lead.fields['Remarks'] || '-'}</p>
             </div>
+        </div>
+        
+        <div class="lead-card-actions">
+            <button class="btn btn-sm btn-outline-secondary toggle-details">
+                <i class="bi bi-chevron-down"></i> View Details
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="editRecord('${lead.id}')">
+                <i class="bi bi-pencil"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${lead.id}')">
+                <i class="bi bi-trash"></i> Delete
+            </button>
         </div>
     `;
 }
@@ -290,17 +306,19 @@ function getStatusBadgeClass(status) {
 
 // Add this function to handle the toggle functionality
 function setupMobileCardListeners() {
-    document.querySelectorAll('.mobile-card').forEach(card => {
+    document.querySelectorAll('.lead-card').forEach(card => {
         const toggleBtn = card.querySelector('.toggle-details');
         const details = card.querySelector('.lead-card-details');
         const icon = toggleBtn.querySelector('i');
         
-        toggleBtn.addEventListener('click', () => {
-            const isHidden = details.style.display === 'none';
-            details.style.display = isHidden ? 'block' : 'none';
-            icon.className = isHidden ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
-            toggleBtn.innerHTML = `${icon.outerHTML} ${isHidden ? 'Hide Details' : 'View Details'}`;
-        });
+        if (toggleBtn && details && icon) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = details.style.display === 'none';
+                details.style.display = isHidden ? 'block' : 'none';
+                icon.className = isHidden ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+                toggleBtn.innerHTML = `${icon.outerHTML} ${isHidden ? 'Hide Details' : 'View Details'}`;
+            });
+        }
     });
 }
 
@@ -313,69 +331,76 @@ function updateRecordCount(count) {
 
 function setupSearch() {
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        let debounceTimer;
-        searchInput.addEventListener('input', (e) => {
-            showLoading(); // Show loading when search starts
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                
-                // First filter by search term
-                filteredRecords = records.filter(record => {
-                    const fields = [
-                        'Contact Person',
-                        'Name of outlet',
-                        'Address',
-                        'Tel',
-                        'Email',
-                        'Postal Code'
-                    ];
-                    
-                    return fields.some(field => {
-                        const value = record.fields[field];
-                        return value && value.toString().toLowerCase().includes(searchTerm);
-                    });
-                });
+    const clearSearchBtn = document.getElementById('clearSearch');
+    let debounceTimer;
 
-                // Then apply area filter if selected
-                const areaFilter = document.getElementById('areaFilter');
-                if (areaFilter && areaFilter.value) {
-                    filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
-                }
-
-                // Reset to first page
-                currentPage = 1;
-                
-                // Render the filtered results
-                renderRecords();
-                hideLoading();
-            }, 300);
-        });
-
-        // Add a clear search function
-        const clearSearch = () => {
-            searchInput.value = '';
-            filteredRecords = [...records];
+    function handleSearch(e) {
+        showLoading(); // Show loading when search starts
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const searchTerm = e.target.value.toLowerCase().trim();
             
-            // Apply area filter if selected
+            // First filter by search term
+            filteredRecords = records.filter(record => {
+                const fields = [
+                    'Contact Person',
+                    'Name of outlet',
+                    'Address',
+                    'Tel',
+                    'Email',
+                    'Postal Code'
+                ];
+                
+                return fields.some(field => {
+                    const value = record.fields[field];
+                    return value && value.toString().toLowerCase().includes(searchTerm);
+                });
+            });
+
+            // Then apply area filter if selected
             const areaFilter = document.getElementById('areaFilter');
             if (areaFilter && areaFilter.value) {
                 filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
             }
-            
-            currentPage = 1;
-            renderRecords();
-        };
 
-        // Add clear button functionality if it exists
-        const clearButton = document.querySelector('.search-container .clear-search');
-        if (clearButton) {
-            clearButton.addEventListener('click', clearSearch);
-        }
+            // Reset to first page
+            currentPage = 1;
+            
+            // Render the filtered results
+            renderRecords();
+            hideLoading();
+        }, 300);
     }
 
-    // Setup sort dropdowns
+    if (searchInput) {
+        // Clear existing listeners
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        newSearchInput.addEventListener('input', handleSearch);
+    }
+
+    // Fix clear search functionality
+    const clearSearch = document.querySelector('.clear-search');
+    if (clearSearch) {
+        clearSearch.addEventListener('click', () => {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                // Reset filtered records to all records
+                filteredRecords = [...records];
+                // Reset to first page
+                currentPage = 1;
+                // Reapply area filter if any
+                const areaFilter = document.getElementById('areaFilter');
+                if (areaFilter && areaFilter.value) {
+                    filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
+                }
+                renderRecords();
+            }
+        });
+    }
+
+    // Setup desktop sort dropdowns
     const sortToggles = document.querySelectorAll('.sort-toggle');
     const sortOptions = document.querySelectorAll('.sort-option');
     
@@ -408,57 +433,100 @@ function setupSearch() {
 
     // Handle sort option selection
     sortOptions.forEach(option => {
+        option.addEventListener('click', handleSortOption);
+    });
+
+    // Setup mobile sort functionality
+    const mobileSortBtn = document.getElementById('mobileSortBtn');
+    const mobileSortMenu = document.getElementById('mobileSortMenu');
+    const closeMobileSort = document.getElementById('closeMobileSort');
+    const mobileBackdrop = document.createElement('div');
+    mobileBackdrop.className = 'mobile-sort-backdrop';
+    document.body.appendChild(mobileBackdrop);
+
+    function showMobileSort() {
+        mobileSortMenu.style.display = 'block';
+        mobileBackdrop.classList.add('active');
+        setTimeout(() => {
+            mobileSortMenu.classList.add('active');
+        }, 10);
+    }
+
+    function hideMobileSort() {
+        mobileSortMenu.classList.remove('active');
+        mobileBackdrop.classList.remove('active');
+        setTimeout(() => {
+            mobileSortMenu.style.display = 'none';
+        }, 300);
+    }
+
+    if (mobileSortBtn) {
+        mobileSortBtn.addEventListener('click', showMobileSort);
+    }
+
+    if (closeMobileSort) {
+        closeMobileSort.addEventListener('click', hideMobileSort);
+    }
+
+    mobileBackdrop.addEventListener('click', hideMobileSort);
+
+    // Handle mobile sort options
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
+    mobileSortOptions.forEach(option => {
         option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const field = option.getAttribute('data-field');
-            const order = option.getAttribute('data-order');
-            
-            showLoading();
-            
-            // Sort the records
-            filteredRecords.sort((a, b) => {
-                const valueA = a.fields[field] || '';
-                const valueB = b.fields[field] || '';
-                
-                // Special handling for different field types
-                switch(field) {
-                    case 'Rating':
-                        const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
-                        const ratingA = ratingOrder[valueA] || 0;
-                        const ratingB = ratingOrder[valueB] || 0;
-                        return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
-                        
-                    case 'Last Visit Date':
-                    case 'Next Visit Date':
-                        const dateA = valueA ? new Date(valueA).getTime() : 0;
-                        const dateB = valueB ? new Date(valueB).getTime() : 0;
-                        return order === 'asc' ? dateA - dateB : dateB - dateA;
-                        
-                    case 'Closing Probability':
-                        const probA = parseFloat(valueA) || 0;
-                        const probB = parseFloat(valueB) || 0;
-                        return order === 'asc' ? probA - probB : probB - probA;
-                        
-                    default:
-                        // Text fields (Contact Person, Name of outlet)
-                        const textA = valueA.toString().toLowerCase();
-                        const textB = valueB.toString().toLowerCase();
-                        if (order === 'asc') {
-                            return textA.localeCompare(textB);
-                        } else {
-                            return textB.localeCompare(textA);
-                        }
-                }
-            });
-            
-            // Close the dropdown
-            option.closest('.sort-dropdown').classList.remove('active');
-            
-            currentPage = 1; // Reset to first page when sorting
-            renderRecords();
-            hideLoading();
+            handleSortOption(e);
+            hideMobileSort();
         });
     });
+
+    // Shared sort handling function
+    function handleSortOption(e) {
+        e.stopPropagation();
+        const field = e.target.getAttribute('data-field');
+        const order = e.target.getAttribute('data-order');
+        
+        showLoading();
+        
+        // Sort the records
+        filteredRecords.sort((a, b) => {
+            const valueA = a.fields[field] || '';
+            const valueB = b.fields[field] || '';
+            
+            // Special handling for different field types
+            switch(field) {
+                case 'Rating':
+                    const ratingOrder = { 'Gold': 3, 'Silver': 2, 'Bronze': 1, '': 0 };
+                    const ratingA = ratingOrder[valueA] || 0;
+                    const ratingB = ratingOrder[valueB] || 0;
+                    return order === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+                    
+                case 'Last Visit Date':
+                case 'Next Visit Date':
+                    const dateA = valueA ? new Date(valueA).getTime() : 0;
+                    const dateB = valueB ? new Date(valueB).getTime() : 0;
+                    return order === 'asc' ? dateA - dateB : dateB - dateA;
+                    
+                case 'Closing Probability':
+                    const probA = parseFloat(valueA) || 0;
+                    const probB = parseFloat(valueB) || 0;
+                    return order === 'asc' ? probA - probB : probB - probA;
+                    
+                default:
+                    // Text fields (Contact Person, Name of outlet)
+                    const textA = valueA.toString().toLowerCase();
+                    const textB = valueB.toString().toLowerCase();
+                    if (order === 'asc') {
+                        return textA.localeCompare(textB);
+                    } else {
+                        return textB.localeCompare(textA);
+                    }
+            }
+        });
+        
+        currentPage = 1; // Reset to first page when sorting
+        renderRecords();
+        hideLoading();
+    }
 }
 
 // Make functions available globally
@@ -487,9 +555,15 @@ async function deleteRecord(id) {
     try {
         await deleteAirtableRecord(id);
         
-        // Remove from both records and filteredRecords arrays
-        records = records.filter(r => r.id !== id);
-        filteredRecords = filteredRecords.filter(r => r.id !== id);
+        // Fetch fresh data after deletion
+        records = await fetchAirtableData(true); // Force refresh
+        filteredRecords = [...records];
+        
+        // Reapply any active filters
+        const areaFilter = document.getElementById('areaFilter');
+        if (areaFilter && areaFilter.value) {
+            filteredRecords = filterByPostalDistrict(filteredRecords, areaFilter.value);
+        }
         
         // Ensure current page is valid after deletion
         const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
@@ -503,7 +577,7 @@ async function deleteRecord(id) {
         alert('Record deleted successfully');
     } catch (error) {
         console.error('Error deleting record:', error);
-        alert('Error deleting record: ' + error.message);
+        alert(`Failed to delete record: ${error.message}`);
     } finally {
         hideLoading(); // Hide loading after operation completes
     }
@@ -629,30 +703,51 @@ function filterByPostalDistrict(records, selectedArea) {
     const areaMapping = {
         'MOT1/K1': {
             districts: ['D01', 'D06', 'D07', 'D08', '09A'],
-            sectors: ['01', '02', '03', '04', '05', '06', '17', '18', '19', '20', '21']
+            sectors: ['01', '02', '03', '04', '05', '06', '17', '18', '19', '20', '21'],
+            aliases: ['MOT1/K1', 'MOT1', 'K1', 'MOT1-K1']
         },
         'MOT2/K2': {
             districts: ['D02', 'D03', 'D04', '09B', 'D10'],
-            sectors: ['07', '08', '09', '10', '14', '15', '16', '23', '24', '25', '26', '27']
+            sectors: ['07', '08', '09', '10', '14', '15', '16', '23', '24', '25', '26', '27'],
+            aliases: ['MOT2/K2', 'MOT2', 'K2', 'MOT2-K2']
         },
         'MOT3/K3': {
             districts: ['D14', 'D15', 'D16', 'D17', 'D18', 'D19'],
             sectors: ['38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', 
-                     '49', '50', '51', '52', '53', '54', '55', '81', '82']
+                     '49', '50', '51', '52', '53', '54', '55', '81', '82'],
+            aliases: ['MOT3/K3', 'MOT3', 'K3', 'MOT3-K3']
         },
         'MOT4/K4': {
             districts: ['D05', 'D09', 'D11', 'D21', 'D22', 'D23', 'D24'],
             sectors: ['11', '12', '13', '22', '28', '29', '30', '58', '59', '60', 
-                     '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71']
+                     '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71'],
+            aliases: ['MOT4/K4', 'MOT4', 'K4', 'MOT4-K4']
         },
         'MOT5/K5': {
             districts: ['09B', 'D12', 'D13', 'D20', 'D25', 'D26', 'D27'],
             sectors: ['31', '32', '33', '34', '35', '36', '37', '56', '57', 
-                     '72', '73', '75', '76', '77', '78', '79', '80']
+                     '72', '73', '75', '76', '77', '78', '79', '80'],
+            aliases: ['MOT5/K5', 'MOT5', 'K5', 'MOT5-K5']
         }
     };
 
     return records.filter(record => {
+        // First check if the record has an assigned_to field
+        const assignedTo = record.fields['assigned_to'];
+        if (assignedTo) {
+            // Get the area config for the selected area
+            const areaConfig = areaMapping[selectedArea];
+            if (!areaConfig) return false;
+
+            // Check if the assigned_to value matches any of the aliases (case insensitive)
+            const normalizedAssignedTo = assignedTo.toLowerCase().trim();
+            return areaConfig.aliases.some(alias => 
+                normalizedAssignedTo === alias.toLowerCase() ||
+                normalizedAssignedTo.includes(alias.toLowerCase())
+            );
+        }
+
+        // If no assigned_to field, fall back to postal code pattern matching
         const postalCode = record.fields['Postal Code'];
         const address = record.fields['Address'];
 
@@ -727,4 +822,55 @@ function showLoading() {
 function hideLoading() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) loadingOverlay.style.display = 'none';
+}
+
+// Add these helper functions if they don't exist
+function getVisitStatus(lastVisitDate, nextVisitDate) {
+    const today = new Date();
+    const next = nextVisitDate ? new Date(nextVisitDate) : null;
+
+    if (!next) return { status: 'no-visit', message: 'No visit scheduled' };
+
+    const daysUntilNext = Math.ceil((next - today) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilNext < 0) {
+        return { 
+            status: 'overdue', 
+            message: `Overdue by ${Math.abs(daysUntilNext)} days`,
+            daysUntil: daysUntilNext
+        };
+    } else if (daysUntilNext === 0) {
+        return { 
+            status: 'today', 
+            message: 'Visit scheduled for today',
+            daysUntil: 0
+        };
+    } else if (daysUntilNext <= 7) {
+        return { 
+            status: 'upcoming', 
+            message: `Visit in ${daysUntilNext} days`,
+            daysUntil: daysUntilNext
+        };
+    } else {
+        return { 
+            status: 'scheduled', 
+            message: `Visit in ${daysUntilNext} days`,
+            daysUntil: daysUntilNext
+        };
+    }
+}
+
+function getVisitBadgeClass(visitStatus) {
+    switch(visitStatus) {
+        case 'overdue':
+            return 'badge bg-danger';
+        case 'today':
+            return 'badge bg-warning';
+        case 'upcoming':
+            return 'badge bg-info';
+        case 'scheduled':
+            return 'badge bg-success';
+        default:
+            return 'badge bg-secondary';
+    }
 }

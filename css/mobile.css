@@ -324,3 +324,213 @@
         display: none;
     }
 } 
+
+/* Mobile Sort Styles */
+.mobile-sort-container {
+    display: none;
+    position: relative;
+    width: 100%;
+    margin: 15px 0;
+    padding: 0 15px;
+}
+
+.mobile-sort-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.mobile-sort-btn:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.mobile-sort-btn i {
+    font-size: 18px;
+}
+
+.mobile-sort-menu {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+    z-index: 1050;
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+.mobile-sort-menu.active {
+    transform: translateY(0);
+}
+
+.mobile-sort-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.mobile-sort-header h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.mobile-sort-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.mobile-sort-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 16px;
+    color: #333;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.mobile-sort-option:hover,
+.mobile-sort-option:active {
+    background-color: #f0f0f0;
+}
+
+.mobile-sort-option i {
+    font-size: 18px;
+    color: #666;
+}
+
+.mobile-sort-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040;
+}
+
+.mobile-sort-backdrop.active {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .mobile-sort-container {
+        display: block;
+    }
+    
+    .desktop-sort-controls {
+        display: none;
+    }
+} 
+
+/* Reminder Section Styles */
+.reminder-list {
+    height: 180px; /* Height to show exactly 3 items */
+    overflow-y: auto;
+    padding-right: 5px;
+    margin: 0;
+}
+
+.reminder-item {
+    padding: 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 54px; /* Fixed height for each item */
+}
+
+.reminder-item strong {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reminder-item span:not(.badge) {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reminder-item .badge {
+    padding: 5px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* Custom scrollbar for reminder list */
+.reminder-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.reminder-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.reminder-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+.reminder-list::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .reminder-list {
+        height: 174px; /* Slightly smaller height for mobile */
+    }
+    
+    .reminder-item {
+        padding: 8px;
+        margin-bottom: 6px;
+        height: 52px; /* Slightly smaller height for mobile */
+    }
+    
+    .reminder-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .reminder-item button {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+/* Rest of existing styles... */ 

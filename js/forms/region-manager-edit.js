@@ -1,6 +1,13 @@
 import { fetchAirtableData, updateAirtableRecord, VALID_STATUSES } from '../shared/airtable.js';
 import { initializeAutocomplete } from '../shared/autocomplete.js';
 
+// Constants for visit scheduling
+const VISIT_INTERVALS = {
+    'Gold': 30,   // 1 month
+    'Silver': 45, // 1.5 months
+    'Bronze': 60  // 2 months
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Check authentication and role
     const userData = localStorage.getItem('user');
@@ -15,9 +22,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // Set the assigned region field based on the user's region
+    const assignedToField = document.getElementById('assigned_to');
+    if (assignedToField && user.region) {
+        assignedToField.value = user.region;
+        assignedToField.disabled = true; // Region managers can only edit leads in their region
+    }
+
     await initializeAutocomplete();
     await loadRecord();
     initializeStatusDropdown();
+    setupVisitDateLogic();
 });
 
 function initializeStatusDropdown() {
@@ -42,6 +57,8 @@ function initializeStatusDropdown() {
 async function loadRecord() {
     const urlParams = new URLSearchParams(window.location.search);
     const recordId = urlParams.get('id');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userRegion = userData?.region;
     
     if (!recordId) {
         alert('No record ID provided');
@@ -59,7 +76,14 @@ async function loadRecord() {
             return;
         }
 
-        // Populate form fields
+        // Check if region manager is trying to edit a record not in their region
+        if (record.fields.assigned_to !== userRegion) {
+            alert('You do not have permission to edit this record');
+            goBack();
+            return;
+        }
+
+        // Get the form
         const form = document.getElementById('editRecordForm');
         if (!form) return;
 
@@ -87,8 +111,13 @@ async function loadRecord() {
             'Proposed Products & HL Target',
             'Follow Up Actions',
             'Remarks',
-            'Status'
+            'Status',
+            'assigned_to'
         ];
+
+        // Add console logging for debugging
+        console.log('Record data:', record.fields);
+        console.log('Assigned to value:', record.fields.assigned_to);
 
         // Populate each field
         fields.forEach(fieldName => {
@@ -97,21 +126,27 @@ async function loadRecord() {
                 let value = record.fields[fieldName] || '';
                 
                 // Special handling for Closing Probability
-                if (fieldName === 'Closing Probability' && value) {
-                    // Convert percentage value to decimal for Airtable (40 -> 0.4)
-                    const numValue = parseFloat(value);
-                    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-                        value = numValue / 100;
-                    }
+                if (fieldName === 'Closing Probability' && value !== undefined) {
+                    // Convert from decimal (0.4) to percentage (40)
+                    value = Math.round(value * 100);
                 }
                 
                 if (element.tagName.toLowerCase() === 'select') {
+                    // For select elements, set the value after a small delay to ensure options are loaded
                     setTimeout(() => {
                         element.value = value;
+                        // Add debug logging for assigned_to field
+                        if (fieldName === 'assigned_to') {
+                            console.log('Setting assigned_to value:', value);
+                            console.log('Current assigned_to element value:', element.value);
+                        }
                     }, 0);
                 } else {
                     element.value = value;
                 }
+            } else {
+                // Log if element not found
+                console.log(`Element not found for field: ${fieldName}`);
             }
         });
 
@@ -122,7 +157,7 @@ async function loadRecord() {
     }
 }
 
-// Update form submit handler with absolute path
+// Update form submit handler
 document.getElementById('editRecordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -136,11 +171,10 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
         if (value) {
             // Special handling for Closing Probability
             if (key === 'Closing Probability') {
-                // Convert to number and validate
+                // Convert percentage value to decimal for Airtable (40 -> 0.4)
                 const numValue = parseFloat(value);
                 if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
-                    // Store the number as is
-                    record[key] = numValue / 100; // Convert percentage to decimal for Airtable
+                    record[key] = numValue / 100;
                 }
             } else {
                 record[key] = value;
@@ -149,20 +183,49 @@ document.getElementById('editRecordForm').addEventListener('submit', async (e) =
     });
 
     try {
+        if (record.Status && !VALID_STATUSES.includes(record.Status)) {
+            throw new Error(`Invalid Status value. Must be one of: ${VALID_STATUSES.join(', ')}`);
+        }
+
         await updateAirtableRecord(recordId, record);
         alert('Record updated successfully!');
         
-        // Preserve user authentication data
-        const userData = JSON.parse(localStorage.getItem('user'));
-        
         // Clear cache but preserve auth
+        const userData = JSON.parse(localStorage.getItem('user'));
         localStorage.clear();
+        sessionStorage.clear();
         localStorage.setItem('user', JSON.stringify(userData));
         
-        // Use absolute path to region-manager.html
         const timestamp = new Date().getTime();
-        window.location.replace('/pages/region-manager.html?forceRefresh=true&t=${timestamp}');
+        window.location.href = `./region-manager.html?forceRefresh=true&t=${timestamp}`;
     } catch (error) {
         alert('Error updating record: ' + error.message);
     }
-}); 
+});
+
+function setupVisitDateLogic() {
+    const ratingSelect = document.getElementById('Rating');
+    const nextVisitDateInput = document.getElementById('Next Visit Date');
+    const lastVisitDateInput = document.getElementById('Last Visit Date');
+
+    function updateNextVisitDate() {
+        if (!lastVisitDateInput.value || !ratingSelect.value) return;
+
+        const rating = ratingSelect.value;
+        const interval = VISIT_INTERVALS[rating] || VISIT_INTERVALS.default;
+
+        const lastVisitDate = new Date(lastVisitDateInput.value);
+        const nextVisitDate = new Date(lastVisitDate);
+        nextVisitDate.setDate(nextVisitDate.getDate() + interval);
+
+        // Format the date as YYYY-MM-DD for the input
+        const nextVisitDateStr = nextVisitDate.toISOString().split('T')[0];
+        nextVisitDateInput.value = nextVisitDateStr;
+    }
+
+    // Update next visit date when rating changes
+    ratingSelect.addEventListener('change', updateNextVisitDate);
+
+    // Update next visit date when last visit date changes
+    lastVisitDateInput.addEventListener('change', updateNextVisitDate);
+} 

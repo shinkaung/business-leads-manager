@@ -210,6 +210,13 @@
     opacity: 0.9;
 }
 
+/* Delete button hover style */
+.btn-danger:hover {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .action-bar {
@@ -568,4 +575,85 @@ th .sort-dropdown {
         padding: 12px 16px; /* Larger touch targets */
         font-size: 16px;
     }
+}
+
+/* Action buttons in table */
+.table td .btn {
+    padding: 6px 16px;
+    font-size: 0.875rem;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    background-color: #fff;
+    border: 1px solid #435a8d;
+    color: #435a8d;
+    min-width: 90px;
+    white-space: nowrap;
+}
+
+.table td .btn:hover {
+    background-color: #435a8d;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(67, 90, 141, 0.2);
+}
+
+.table td .btn i {
+    font-size: 0.9rem;
+}
+
+/* For admin view with multiple buttons */
+.admin-view .table td .btn {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+/* Table cell alignment and spacing */
+.table td:last-child {
+    text-align: center;
+    padding: 0.75rem;
+    white-space: nowrap;
+}
+
+/* Hover effect for table rows */
+.table tr:hover {
+    background-color: rgba(67, 90, 141, 0.05);
+}
+
+.table tr:hover td .btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Status badge styles */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    min-width: 100px;
+}
+
+.status-badge.new-lead {
+    background-color: #ff4757;
+    color: white;
+}
+
+.status-badge.qualified {
+    background-color: #ffa502;
+    color: white;
+}
+
+.status-badge.existing-customer {
+    background-color: #2ed573;
+    color: white;
 } 

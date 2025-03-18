@@ -2,10 +2,18 @@ import { fetchAirtableData, updateAirtableRecord, VALID_STATUSES } from '../shar
 import { initializeAutocomplete } from '../shared/autocomplete.js';
 import { getUserRole } from '../shared/auth.js';
 
+// Constants for visit scheduling
+const VISIT_INTERVALS = {
+    'Gold': 30,   // 1 month
+    'Silver': 45, // 1.5 months
+    'Bronze': 60  // 2 months
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initializeAutocomplete();
     await loadRecord();
     initializeStatusDropdown();
+    setupVisitDateCalculation();
 });
 
 function initializeStatusDropdown() {
@@ -90,7 +98,8 @@ async function loadRecord() {
             'Proposed Products & HL Target',
             'Follow Up Actions',
             'Remarks',
-            'Status'
+            'Status',
+            'assigned_to'
         ];
 
         // Populate each field
@@ -207,5 +216,40 @@ function goBack() {
             break;
         default:
             window.location.href = './login.html';
+    }
+}
+
+// Add the visit date calculation setup
+function setupVisitDateCalculation() {
+    const ratingSelect = document.getElementById('Rating');
+    const nextVisitDateInput = document.getElementById('Next Visit Date');
+    const lastVisitDateInput = document.getElementById('Last Visit Date');
+
+    if (ratingSelect && nextVisitDateInput && lastVisitDateInput) {
+        // Update next visit date when rating changes
+        ratingSelect.addEventListener('change', () => {
+            if (lastVisitDateInput.value) {
+                const rating = ratingSelect.value;
+                if (rating) {
+                    const interval = VISIT_INTERVALS[rating];
+                    const lastVisitDate = new Date(lastVisitDateInput.value);
+                    const nextVisitDate = new Date(lastVisitDate);
+                    nextVisitDate.setDate(lastVisitDate.getDate() + interval);
+                    nextVisitDateInput.value = nextVisitDate.toISOString().split('T')[0];
+                }
+            }
+        });
+
+        // Update next visit date when last visit date changes
+        lastVisitDateInput.addEventListener('change', () => {
+            if (lastVisitDateInput.value && ratingSelect.value) {
+                const rating = ratingSelect.value;
+                const interval = VISIT_INTERVALS[rating];
+                const lastVisitDate = new Date(lastVisitDateInput.value);
+                const nextVisitDate = new Date(lastVisitDate);
+                nextVisitDate.setDate(lastVisitDate.getDate() + interval);
+                nextVisitDateInput.value = nextVisitDate.toISOString().split('T')[0];
+            }
+        });
     }
 }

@@ -289,6 +289,14 @@ function createVisitCard(visit) {
                         <button class="btn btn-success btn-sm" onclick="markVisitComplete('${visit.id}')" data-bs-toggle="tooltip" title="Mark as Visited">
                             <i class="bi bi-check-circle-fill"></i>
                         </button>
+                    ` : visit.fields['Next Visit Date'] ? `
+                        <a href="${createGoogleCalendarUrl(visit)}" target="_blank" 
+                           class="btn btn-outline-primary btn-sm" 
+                           data-bs-toggle="tooltip" 
+                           onclick="return confirmCalendarAdd(event)"
+                           title="Add to Calendar">
+                            <i class="bi bi-calendar-plus"></i>
+                        </a>
                     ` : ''}
                     <button class="btn btn-primary btn-sm" onclick="editLead('${visit.id}')" data-bs-toggle="tooltip" title="Edit Lead">
                         <i class="bi bi-pencil-fill"></i>
@@ -350,12 +358,20 @@ function createMobileVisitCard(visit) {
             <div class="mobile-card-actions">
                 ${visitStatus.status === 'completed' ? `
                     <button class="btn btn-info btn-sm" onclick="markVisitComplete('${visit.id}')" data-bs-toggle="tooltip" title="Schedule Next Visit">
-                        <i class="bi bi-calendar-plus"></i>
+                        <i class="bi bi-calendar-plus"></i> Schedule Next
                     </button>
                 ` : nextVisitDate <= new Date() ? `
                     <button class="btn btn-success btn-sm" onclick="markVisitComplete('${visit.id}')" data-bs-toggle="tooltip" title="Mark as Visited">
                         <i class="bi bi-check-circle-fill"></i> Complete
                     </button>
+                ` : visit.fields['Next Visit Date'] ? `
+                    <a href="${createGoogleCalendarUrl(visit)}" target="_blank" 
+                       class="btn btn-outline-primary btn-sm" 
+                       data-bs-toggle="tooltip" 
+                       onclick="return confirmCalendarAdd(event)"
+                       title="Add to Calendar">
+                        <i class="bi bi-calendar-plus"></i> Add to Calendar
+                    </a>
                 ` : ''}
                 <button class="btn btn-primary btn-sm" onclick="editLead('${visit.id}')" data-bs-toggle="tooltip" title="Edit Lead">
                     <i class="bi bi-pencil-fill"></i> Edit
@@ -670,4 +686,73 @@ function getRatingBadgeClass(rating) {
         default:
             return 'rating-bronze';
     }
+}
+
+// Add this function after the getRatingBadgeClass function
+function createGoogleCalendarUrl(visit) {
+    try {
+        // Get visit details
+        const businessName = encodeURIComponent(visit.fields['Name of outlet'] || 'Business Visit');
+        const address = encodeURIComponent(visit.fields['Address'] || '');
+        const contactPerson = encodeURIComponent(visit.fields['Contact Person'] || '');
+        const phone = encodeURIComponent(visit.fields['Tel'] || '');
+        
+        // Safely parse the visit date
+        const visitDateStr = visit.fields['Next Visit Date'];
+        if (!visitDateStr) {
+            console.error('No visit date available');
+            return '#';
+        }
+
+        // Parse the date and set a specific time (e.g., 9 AM)
+        const visitDate = new Date(visitDateStr);
+        visitDate.setHours(9, 0, 0, 0); // Set to 9:00 AM
+
+        // Create end date 1 hour later
+        const endDate = new Date(visitDate);
+        endDate.setHours(10, 0, 0, 0); // Set to 10:00 AM
+
+        // Get user info for the description
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const userRegion = userData.region || 'Unknown Region';
+        
+        // Format dates for Google Calendar (using UTC to avoid timezone issues)
+        const startDate = visitDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const endDateTime = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        
+        // Create event description with user context
+        const description = encodeURIComponent(
+            `Sales Representative: ${userData.name || 'N/A'}\n` +
+            `Region: ${userRegion}\n` +
+            `Contact Person: ${visit.fields['Contact Person'] || 'N/A'}\n` +
+            `Phone: ${visit.fields['Tel'] || 'N/A'}\n` +
+            `Rating: ${visit.fields['Rating'] || 'N/A'}\n` +
+            `Notes: ${visit.fields['Notes'] || 'N/A'}`
+        );
+
+        // Generate Google Calendar URL
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+            `&text=${businessName} - Sales Visit` +
+            `&dates=${startDate}/${endDateTime}` +
+            `&details=${description}` +
+            `&location=${address}` +
+            `&sf=true` +
+            `&output=xml`;
+    } catch (error) {
+        console.error('Error creating calendar URL:', error);
+        return '#'; // Return hash if there's an error
+    }
+}
+
+// Add this function to handle calendar confirmation
+window.confirmCalendarAdd = function(event) {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!userData.email) {
+        const confirmed = confirm(
+            'You will be redirected to Google Calendar to add this event. ' +
+            'You\'ll need to sign in with your Google account if you aren\'t already. Continue?'
+        );
+        return confirmed;
+    }
+    return true;
 } 
